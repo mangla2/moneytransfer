@@ -1,11 +1,21 @@
 package com.revolut.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class User {
 
+	@JsonIgnore
 	private long id;
+	
 	private String firstName;
+	
 	private String lastName;
+	
 	private String email;
+	
+	public User(){
+		
+	}
 	
 	/**
 	 * @param id
@@ -20,6 +30,21 @@ public class User {
 		this.lastName = lastName;
 		this.email = email;
 	}
+	
+	
+	/**
+	 * @param firstName
+	 * @param lastName
+	 * @param email
+	 */
+	public User(String firstName, String lastName, String email) {
+		super();
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+	}
+
+
 	/**
 	 * @return the id
 	 */

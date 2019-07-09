@@ -1,5 +1,8 @@
 package com.revolut.app.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class User {
@@ -13,8 +16,10 @@ public class User {
 	
 	private String email;
 	
+	private List<Account> accounts;
+	
 	public User(){
-		
+		accounts = new ArrayList<>();
 	}
 	
 	/**
@@ -93,6 +98,13 @@ public class User {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
+
+	/**
+	 * @return the accounts
+	 */
+	public List<Account> getAccounts() {
+		return accounts;
+	}
+
 	
 }

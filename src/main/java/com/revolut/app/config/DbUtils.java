@@ -2,6 +2,7 @@ package com.revolut.app.config;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -81,6 +82,8 @@ public class DbUtils {
 					statement.setInt(i, Integer.valueOf(value.toString()));
 				}else if(value != null && value instanceof Long) {
 					statement.setLong(i, Long.valueOf(value.toString()));
+				}else if(value != null && value instanceof BigDecimal) {
+					statement.setBigDecimal(i, (BigDecimal)value);
 				}else {
 					statement.setNull(i,java.sql.Types.VARCHAR);
 				}

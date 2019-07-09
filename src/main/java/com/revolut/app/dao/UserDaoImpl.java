@@ -131,4 +131,27 @@ public class UserDaoImpl implements UserDao {
 		}
 		return new AppResponse(true, user);
 	}
+
+	@Override
+	public AppResponse deleteUser(User user) {
+		Logger.debug("Starting deleteUser in UserDaoImpl having email", user.getEmail());
+		LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
+		criteria.put("email", user.getEmail());
+
+		Logger.info("Deleting the user");
+		try (Connection connection = dbConn.getConnection();
+				PreparedStatement statement = connection.prepareStatement(DbQueries.DELETE_USER,Statement.RETURN_GENERATED_KEYS)) {
+			dbConn.savePrepareStatement(connection, statement, criteria);
+			int affectedRows = statement.executeUpdate();
+
+			if (affectedRows == 0) {
+				Logger.error("deleteUser(): Delete user failed, no rows affected." + user);
+				return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_PROCESSING,"Delete user failed, no rows affected."));
+			}
+           return new AppResponse(true,null);
+		}catch(SQLException e){
+			Logger.error("Exception occured while deleting the user", e.getMessage());
+			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_PROCESSING,"Exception occured while deleting the user "+e.getMessage()));
+		}
+	}
 }

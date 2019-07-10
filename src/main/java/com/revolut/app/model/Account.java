@@ -1,11 +1,17 @@
 package com.revolut.app.model;
 
 import java.math.BigDecimal;
+import java.net.NetworkInterface;
+import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.Enumeration;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(Include.NON_NULL)
 public class Account {
 
 	private String accountNumber;
@@ -140,13 +146,49 @@ public class Account {
 		this.userId = userId;
 	}
 
-	private String generateAccountNumber(String email) {
-		long now = Instant.now().toEpochMilli();
-		int emailHash = email.hashCode();
-		int rand = (int) ((Math.random() * ((now-emailHash)*10)));
-		rand = rand + emailHash*10;
-		return String.valueOf(rand);
+	public String generateAccountNumber(String email) {
+		int TOTAL_BITS = 64;
+	    int EPOCH_BITS = 42;
+	    int NODE_ID_BITS = 10;
+	    int SEQUENCE_BITS = 12;
+
+	    int maxNodeId = (int)(Math.pow(2, NODE_ID_BITS) - 1);
+	    int maxSequence = (int)(Math.pow(2, SEQUENCE_BITS) - 1);
+
+	    long CUSTOM_EPOCH = 1420070400000L;
+	    
+	    long sequence = 0L;
+	    
+	    int nodeId = createNodeId(maxNodeId);
+	    long currentTimestamp = Instant.now().toEpochMilli() - CUSTOM_EPOCH;
+	    long id = currentTimestamp << (TOTAL_BITS - EPOCH_BITS);
+        id |= (nodeId << (TOTAL_BITS - EPOCH_BITS - NODE_ID_BITS));
+        id |= sequence;
+        
+        return String.valueOf(id);
 	}
+	
+	private int createNodeId(int maxNodeId) {
+        int nodeId;
+        try {
+            StringBuilder sb = new StringBuilder();
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = networkInterfaces.nextElement();
+                byte[] mac = networkInterface.getHardwareAddress();
+                if (mac != null) {
+                    for(int i = 0; i < mac.length; i++) {
+                        sb.append(String.format("%02X", mac[i]));
+                    }
+                }
+            }
+            nodeId = sb.toString().hashCode();
+        } catch (Exception ex) {
+            nodeId = (new SecureRandom().nextInt());
+        }
+        nodeId = nodeId & maxNodeId;
+        return nodeId;
+    }
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()

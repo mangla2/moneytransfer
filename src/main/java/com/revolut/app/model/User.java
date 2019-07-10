@@ -3,6 +3,9 @@ package com.revolut.app.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class User {
@@ -10,10 +13,13 @@ public class User {
 	@JsonIgnore
 	private long id;
 	
+	@NotNull(message = "First Name cannot be null")
 	private String firstName;
 	
+	@NotNull(message = "Last Name cannot be null")
 	private String lastName;
 	
+	@Email(message = "Email should be valid")
 	private String email;
 	
 	private List<Account> accounts;
@@ -106,5 +112,4 @@ public class User {
 		return accounts;
 	}
 
-	
 }

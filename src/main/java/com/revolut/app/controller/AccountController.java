@@ -12,9 +12,7 @@ import org.apache.logging.log4j.Logger;
 import com.revolut.app.model.Account;
 import com.revolut.app.model.AppResponse;
 import com.revolut.app.service.AccountService;
-import com.revolut.app.service.UserService;
 import com.revolut.app.service.impl.AccountServiceImpl;
-import com.revolut.app.service.impl.UserServiceImpl;
 
 @Path("/user/account")
 @Produces(MediaType.APPLICATION_JSON)

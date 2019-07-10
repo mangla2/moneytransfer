@@ -10,7 +10,7 @@ import org.glassfish.jersey.servlet.ServletContainer;
 public class AppServer {
 
     private static final Logger Logger = LogManager.getLogger(AppServer.class);
-    private static final int SERVER_PORT = 8080;
+    private static final int SERVER_PORT = 8081;
     private static final String CONTEXT_PATH = "/*";
 
     private static Server getServer() {

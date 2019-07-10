@@ -1,5 +1,8 @@
 package com.revolut.app.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AppResponse {
 
 	private boolean status;
@@ -40,6 +43,18 @@ public class AppResponse {
 		this.error = error;
 	}
 	
+	/**
+	 * @param status
+	 * @param message
+	 * @param error
+	 */
+	public AppResponse(boolean status, String message, ErrorDetails error) {
+		super();
+		this.status = status;
+		this.message = message;
+		this.error = error;
+	}
+
 	/**
 	 * @return the status
 	 */

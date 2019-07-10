@@ -45,8 +45,9 @@ public class AccountDaoImpl implements AccountDao {
 	@Override
 	public AppResponse createAccount(Account account) {
 		Logger.debug("Starting createAccount in AccountDaoImpl", account);
+		String accountNumber = account.generateAccountNumber(account.getEmail());
 		LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
-		criteria.put("accountNumber", account.getAccountNumber());
+		criteria.put("accountNumber", accountNumber);
 		criteria.put("userId", account.getUserId());
 		criteria.put("balance", account.getBalance());
 		criteria.put("currencyCode", account.getCurrencyCode());
@@ -60,8 +61,9 @@ public class AccountDaoImpl implements AccountDao {
 				Logger.error("createAccount(): Creating account failed, no rows affected");
 				return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_PROCESSING,"Creating account failed, no rows affected."));
 			}
+			account.setAccountNumber(accountNumber);
 		}catch(SQLException e){
-			Logger.error("Exception occured while saving the new user", e.getMessage());
+			Logger.error("Exception occured while creating a new account - {}", e.getMessage());
 			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_PROCESSING,"Exception occured while creating the account for user "+e.getMessage()));
 		}
 		Logger.info("New account created successfully with accountNumber: {} for userId: {}", account.getAccountNumber(), account.getUserId());

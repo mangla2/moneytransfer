@@ -65,8 +65,11 @@ public class UserServiceImpl implements UserService {
 		resp = accountDao.createAccount(new Account(user.getEmail(), userId, new BigDecimal(5000), "INR"));
 		if(!resp.isStatus()){
 			userDao.deleteUser(user);
+			return new AppResponse(false, "User cannot be created", new ErrorDetails(Constants.ERROR_CODE_PROCESSING, "Account failed to create hence deleting the user"));
 		}
-		user.getAccounts().add((Account)resp.getData());
+		Account acc = (Account)resp.getData();
+		acc.setEmail(null);
+		user.getAccounts().add(acc);
 		return new AppResponse(true,user);
 	}
     

@@ -150,11 +150,8 @@ public class Account {
 		int TOTAL_BITS = 64;
 	    int EPOCH_BITS = 42;
 	    int NODE_ID_BITS = 10;
-	    int SEQUENCE_BITS = 12;
 
 	    int maxNodeId = (int)(Math.pow(2, NODE_ID_BITS) - 1);
-	    int maxSequence = (int)(Math.pow(2, SEQUENCE_BITS) - 1);
-
 	    long CUSTOM_EPOCH = 1420070400000L;
 	    
 	    long sequence = 0L;

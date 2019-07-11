@@ -8,6 +8,8 @@ public interface UserDao {
 	public AppResponse saveUser(User user);
 	public AppResponse getAllUsers();
 	public AppResponse getUserByEmail(String email);
-	public AppResponse deleteUser(User user);
+	public AppResponse deleteUser(String email);
+	public AppResponse getAllAccountByUser(String email);
+	public AppResponse deleteAccountsByUser(String email);
 	
 }

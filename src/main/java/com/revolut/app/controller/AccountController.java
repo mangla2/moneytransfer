@@ -1,5 +1,6 @@
 package com.revolut.app.controller;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -14,7 +15,7 @@ import com.revolut.app.model.AppResponse;
 import com.revolut.app.service.AccountService;
 import com.revolut.app.service.impl.AccountServiceImpl;
 
-@Path("/user/account")
+@Path("/account")
 @Produces(MediaType.APPLICATION_JSON)
 public class AccountController {
 
@@ -35,9 +36,11 @@ public class AccountController {
     
     @POST
     @Path("/create")
+    @Consumes(MediaType.APPLICATION_JSON)
     public AppResponse createAccount(Account account) {
     	Logger.info("Request received for creating the account {}", account);
         return acctSvc.createAccount(account);
     }
 
+    
 }

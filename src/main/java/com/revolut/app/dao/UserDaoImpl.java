@@ -16,6 +16,7 @@ import com.revolut.app.config.DbUtils;
 import com.revolut.app.constants.Constants;
 import com.revolut.app.constants.DbQueries;
 import com.revolut.app.model.ErrorDetails;
+import com.revolut.app.model.Account;
 import com.revolut.app.model.AppResponse;
 import com.revolut.app.model.User;
 
@@ -69,7 +70,7 @@ public class UserDaoImpl implements UserDao {
 			}
 		}catch(SQLException e){
 			Logger.error("Exception occured while saving the new user", e.getMessage());
-			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_PROCESSING,"Exception occured while saving the new user "+e.getMessage()));
+			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured :"+e.getMessage()));
 		}
 		Logger.info("New user created successfully with user id : {}", user.getId());
 		return new AppResponse(true,user);
@@ -90,15 +91,16 @@ public class UserDaoImpl implements UserDao {
 							rs.getString(Constants.USER_LAST_NAME),
 							rs.getString(Constants.USER_EMAIL)
 							);
+					user.getAccounts().addAll((List<Account>)getAllAccountByUser(user.getEmail()).getData());
 					userslist.add(user);
 				}
 			}catch(SQLException e){
 				Logger.error("Exception occured while getting all the users", e.getMessage());
-				return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_PROCESSING,"Exception occured while getting all the users "+e.getMessage()));
+				return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured :"+e.getMessage()));
 			}
 		}catch(SQLException e){
 			Logger.error("Exception occured while getting all the users", e.getMessage());
-			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_PROCESSING,"Exception occured while getting all the users "+e.getMessage()));
+			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured :"+e.getMessage()));
 		}
 		Logger.info("Users returned from db {}", userslist);
 		return new AppResponse(true, userslist);
@@ -120,23 +122,60 @@ public class UserDaoImpl implements UserDao {
 							rs.getString(Constants.USER_LAST_NAME),
 							rs.getString(Constants.USER_EMAIL)
 							);
+					AppResponse allAccounts = getAllAccountByUser(user.getEmail());
+					List<Account> userAccounts = null;
+					if(allAccounts.getData() != null){
+						userAccounts = (List<Account>)allAccounts.getData();
+					}
+					user.getAccounts().addAll(userAccounts);
 				}
 			}catch(SQLException e){
 				Logger.error("Exception occured while getting the user", e.getMessage());
-				return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_PROCESSING,"Exception occured while getting the user "+e.getMessage()));
+				return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured :"+e.getMessage()));
 			}
 		}catch(SQLException e){
 			Logger.error("Exception occured while getting the user", e.getMessage());
-			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_PROCESSING,"Exception occured while getting the user "+e.getMessage()));
+			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured : "+e.getMessage()));
 		}
 		return new AppResponse(true, user);
 	}
 
 	@Override
-	public AppResponse deleteUser(User user) {
-		Logger.debug("Starting deleteUser in UserDaoImpl having email", user.getEmail());
+	public AppResponse getAllAccountByUser(String email) {
+		Logger.debug("Starting getAllAccountByUser in AccountDaoImpl for user with email {}", email);
 		LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
-		criteria.put("email", user.getEmail());
+		criteria.put(Constants.USER_EMAIL, email);
+
+		List<Account> accountlist = new ArrayList<>();
+
+		try (Connection connection = dbConn.getConnection();
+				PreparedStatement statement = connection.prepareStatement(DbQueries.GET_ACCOUNTS_BY_USER)){
+			dbConn.savePrepareStatement(connection, statement, criteria);
+			try (ResultSet rs = statement.executeQuery();) {
+				while (rs.next()) {
+					Account account = new Account();
+					account.setAccountNumber(rs.getString(Constants.ACCOUNT_NUMBER));
+					account.setBalance(rs.getBigDecimal(Constants.ACCOUNT_BALANCE));
+					account.setCurrencyCode(rs.getString(Constants.ACCOUNT_CURRENCY_CODE));
+					accountlist.add(account);
+				}
+			}catch(SQLException e){
+				Logger.error("Exception occured while getting all the accounts for user {} - {}", email, e.getMessage());
+				return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured :"+e.getMessage()));
+			}
+		}catch(SQLException e){
+			Logger.error("Exception occured while getting all the accounts for user {} - {}", email, e.getMessage());
+			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured :"+e.getMessage()));
+		}
+		Logger.info("Accounts returned from db {}", accountlist);
+		return new AppResponse(true, accountlist);
+	}
+
+	@Override
+	public AppResponse deleteUser(String email) {
+		Logger.debug("Starting deleteUser in UserDaoImpl having email", email);
+		LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
+		criteria.put("email", email);
 
 		Logger.info("Deleting the user");
 		try (Connection connection = dbConn.getConnection();
@@ -145,13 +184,32 @@ public class UserDaoImpl implements UserDao {
 			int affectedRows = statement.executeUpdate();
 
 			if (affectedRows == 0) {
-				Logger.error("deleteUser(): Delete user failed, no rows affected." + user);
+				Logger.error("deleteUser(): Delete user failed, no rows affected");
 				return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_PROCESSING,"Delete user failed, no rows affected."));
 			}
-           return new AppResponse(true,null);
+			return new AppResponse(true,null);
 		}catch(SQLException e){
 			Logger.error("Exception occured while deleting the user", e.getMessage());
-			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_PROCESSING,"Exception occured while deleting the user "+e.getMessage()));
+			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured :"+e.getMessage()));
 		}
+	}
+
+	@Override
+	public AppResponse deleteAccountsByUser (String email) {
+		Logger.debug("Starting deleteAccount in AccountDaoImpl for email {}",email);
+		LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
+		criteria.put("email", email);
+
+		Logger.info("Deleting all accounts for user having email [{}]", email);
+		try (Connection connection = dbConn.getConnection();
+				PreparedStatement statement = connection.prepareStatement(DbQueries.DELETE_ACCOUNT_BY_EMAIL)) {
+			dbConn.savePrepareStatement(connection, statement, criteria);
+			statement.executeUpdate();
+		}catch(SQLException e){
+			Logger.error("Exception occured while creating a new account - {}", e.getMessage());
+			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION, "Exception occured :"+e.getMessage()));
+		}
+		Logger.info("Account deleted successfully for user: {}", email);
+		return new AppResponse(true, null);
 	}
 }

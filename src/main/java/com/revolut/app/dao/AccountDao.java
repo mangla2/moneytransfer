@@ -7,4 +7,6 @@ public interface AccountDao {
 
 	public AppResponse createAccount(Account account);
 	public AppResponse getAllAccounts();
+	public AppResponse getAccountByAccountNumber(String accountNumber);
+	public AppResponse deleteAccountByAccountNumber(String accountNumber);
 }

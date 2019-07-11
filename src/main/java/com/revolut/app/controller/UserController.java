@@ -1,9 +1,11 @@
 package com.revolut.app.controller;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,7 +33,6 @@ public class UserController {
     	return userSvc.getAllUsers();
     }
     
-    
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -39,4 +40,26 @@ public class UserController {
     	Logger.info("Request received for creating a user {}", user);
         return userSvc.createUser(user);
     }
+    
+    @GET
+    @Path("/{email}")
+    public AppResponse getUser(@PathParam("email") String email) {
+    	Logger.info("Request received for getting all the accounts of user");
+    	return userSvc.getUser(email);
+    }
+    
+    @DELETE
+    @Path("/{email}")
+    public AppResponse deleteUser(@PathParam("email") String email) {
+    	Logger.info("Request received for deleting a user having email [{}]", email);
+        return userSvc.deleteUser(email);
+    }
+    
+    @GET
+    @Path("/account/all/{email}")
+    public AppResponse getAllAccountForUser(@PathParam("email") String email) {
+    	Logger.info("Request received for getting all the accounts of user");
+    	return userSvc.getAccountsByUser(email);
+    }
+
 }

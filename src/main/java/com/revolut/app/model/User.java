@@ -40,6 +40,7 @@ public class User {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
+		accounts = new ArrayList<>();
 	}
 	
 	
@@ -53,6 +54,7 @@ public class User {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
+		accounts = new ArrayList<>();
 	}
 
 

@@ -14,9 +14,11 @@ import org.apache.logging.log4j.Logger;
 import com.revolut.app.config.DbUtils;
 import com.revolut.app.constants.Constants;
 import com.revolut.app.constants.DbQueries;
+import com.revolut.app.exception.InternalServerError;
 import com.revolut.app.model.Account;
 import com.revolut.app.model.AppResponse;
 import com.revolut.app.model.ErrorDetails;
+import com.revolut.app.model.Transaction;
 
 public class AccountDaoImpl implements AccountDao {
 
@@ -121,7 +123,7 @@ public class AccountDaoImpl implements AccountDao {
 		Logger.debug("Starting getAccountByAccountNumber in AccountDaoImpl {}", accountNumber);
 		LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
 		criteria.put(Constants.ACCOUNT_NUMBER, accountNumber);
-		
+
 		Account account = null;
 		try (Connection connection = dbConn.getConnection();
 				PreparedStatement statement = connection.prepareStatement(DbQueries.GET_ACCOUNT_BY_ACCOUNT_NUM)){
@@ -145,6 +147,87 @@ public class AccountDaoImpl implements AccountDao {
 			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured : "+e.getMessage()));
 		}
 		return new AppResponse(true, account);
+	}
+
+	@Override
+	public synchronized AppResponse makeTrasaction(Transaction transaction) {
+		Logger.debug("Initiating the transaction {}", transaction);
+
+		Account from = transaction.getFrom();
+		Account to = transaction.getTo();
+
+		try{
+			while(from.getBalance().compareTo(transaction.getDebitAmount()) < 0){
+				wait();
+			}
+
+			// update accounts balance
+			from.setBalance(from.getBalance().subtract(transaction.getDebitAmount()));
+			to.setBalance(to.getBalance().add(transaction.getCreditAmount()));
+
+			try (Connection connection = dbConn.getConnection()){
+				connection.setAutoCommit(false);
+
+				try(PreparedStatement statement = connection.prepareStatement(DbQueries.SAVE_TRANSACTION);
+						PreparedStatement psUpdate = connection.prepareStatement(DbQueries.UPDATE_ACCOUNT_BALANCE)) {
+
+					LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
+					long transactionId = System.currentTimeMillis();
+					criteria.put(Constants.TRANSACTION_ID, transactionId);
+					criteria.put(Constants.ACCOUNT_FROM_NUMBER, from.getAccountNumber());
+					criteria.put(Constants.ACCOUNT_TO_NUMBER, to.getAccountNumber());
+					criteria.put(Constants.AMOUNT, transaction.getDebitAmount());
+					criteria.put(Constants.NOTES, transaction.getNotes());
+					criteria.put(Constants.CREATED_AT, transaction.getCreatedAt());
+					criteria.put(Constants.ACCOUNT_CURRENCY_CODE, from.getCurrencyCode());
+
+					dbConn.savePrepareStatement(connection, statement, criteria);
+					int result = statement.executeUpdate();
+
+					if(result == 1){
+						Logger.debug("Transaction is successful - {}", result);
+					}
+					
+					//update from account
+					criteria.clear();
+					criteria.put(Constants.ACCOUNT_BALANCE, transaction.getDebitAmount());
+					criteria.put(Constants.ACCOUNT_NUMBER, from.getAccountNumber());
+					dbConn.savePrepareStatement(connection, psUpdate, criteria);
+					psUpdate.addBatch();
+
+					// update to account
+					criteria.clear();
+					criteria.put(Constants.ACCOUNT_BALANCE, transaction.getCreditAmount());
+					criteria.put(Constants.ACCOUNT_NUMBER, to.getAccountNumber());
+					dbConn.savePrepareStatement(connection, psUpdate, criteria);
+					psUpdate.addBatch();
+
+					int[] rowsUpdated = psUpdate.executeBatch();
+					int affectedRows = result + rowsUpdated[0] + rowsUpdated[1];
+
+					Logger.debug("Number of rows updated for the transfer : " + affectedRows);
+					if(affectedRows == 3){
+						connection.commit();
+						transaction.setTransactionId(String.valueOf(transactionId));
+						from.getTransactionsList().add(transaction);
+					}
+				}catch(InternalServerError e){
+					connection.rollback();
+					connection.setAutoCommit(true);
+					Logger.error("Exception occured - {}", e.getMessage());
+					return new AppResponse(false,"Failed to complete the transaction", new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,e.getMessage()));
+				}
+			}catch(SQLException e){
+				Logger.error("Exception occured - {}", e.getMessage());
+				return new AppResponse(false,"Failed to complete the transaction", new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,e.getMessage()));
+			}
+			notifyAll();
+		}catch(InterruptedException e){
+			Logger.error("Exception occured - {}", e.getMessage());
+			return new AppResponse(false,"Failed to complete the transaction", new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,e.getMessage()));
+		}
+
+		return new AppResponse(true, transaction);
 	}
 
 }

@@ -5,6 +5,7 @@ import java.net.NetworkInterface;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Enumeration;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,6 +29,15 @@ public class Account {
 	@JsonProperty(required=true)
 	private String currencyCode;
 
+	/**
+	 * @return the transactionsList
+	 */
+	public List<Transaction> getTransactionsList() {
+		return transactionsList;
+	}
+
+	private List<Transaction> transactionsList;
+	
 	public Account(){
 		
 	}

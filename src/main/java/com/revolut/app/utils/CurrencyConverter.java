@@ -1,0 +1,95 @@
+package com.revolut.app.utils;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import javax.ws.rs.HttpMethod;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.revolut.app.constants.Constants;
+import com.revolut.app.model.FixerError;
+import com.revolut.app.model.FixerResponse;
+
+public class CurrencyConverter {
+
+	private static final String BASE_API = "http://data.fixer.io/api/latest";
+	private static final String ACCESS_KEY = "65475af89d34cd232165f87cf25923f2";
+	private static final String FORMAT_VALUE = "1";
+	private static final Logger Logger = LogManager.getLogger(CurrencyConverter.class);
+
+	public static BigDecimal getConversionRate(String fromCurrencyCode, String toCurrencyCode) {
+		Logger.debug("Starting getConversionRate in CurrencyConverter from[{}] to[{}]", fromCurrencyCode, toCurrencyCode);
+		BigDecimal conversionRate = new BigDecimal(0);
+
+		if (fromCurrencyCode.equals(toCurrencyCode)) {
+			return conversionRate.ONE;
+		}
+
+		if ((fromCurrencyCode != null && !fromCurrencyCode.isEmpty())
+				&& (toCurrencyCode != null && !toCurrencyCode.isEmpty())) {
+
+			StringBuilder url = new StringBuilder(BASE_API);
+			url.append(Constants.ACCESS_KEY_PARAM)
+			.append(ACCESS_KEY)
+			.append(Constants.FORMAT_KEY_PARAM)
+			.append(FORMAT_VALUE);
+
+			FixerResponse response = getConversionResponse(url.toString());
+
+			if (response != null) {
+				JSONObject rates = response.getRates();
+				String from = rates.getString(fromCurrencyCode);
+				String to = rates.getString(toCurrencyCode);
+
+				if(from == null || to == null){
+					Logger.error("Conversion Currency specified is incorrect or cannot be found for conversion");
+					return conversionRate;
+				}
+
+				double conversionResult = Double.valueOf(from) / Double.valueOf(to);
+				conversionRate = new BigDecimal(conversionResult);
+			}
+
+		}
+		return conversionRate;
+	}
+
+	private static FixerResponse getConversionResponse(String baseUrl){
+		Logger.debug("Starting getConversionResponse in CurrencyConverter calling API-{}", baseUrl);
+		FixerResponse resp = new FixerResponse();
+		BufferedReader reader = null;
+		HttpURLConnection connection = null;
+		URL url = null;
+		try {
+			url = new URL(baseUrl);
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod(HttpMethod.GET);
+			
+			if (connection.getResponseCode() == 200) {
+				InputStream inputStream = connection.getInputStream();
+				InputStreamReader ipr = new InputStreamReader(inputStream);
+				reader = new BufferedReader(ipr);
+				String inputLine;
+				StringBuffer jsonString = new StringBuffer();
+				while ((inputLine = reader.readLine()) != null) {
+					jsonString.append(inputLine);
+				}
+				resp = new ObjectMapper().readValue(jsonString.toString(), FixerResponse.class);
+				Logger.info("Response received for conversion rates{}", resp);
+			}else{
+				resp = new FixerResponse("false",new FixerError(Constants.ERROR_CODE_PROCESSING,"Could not connect to Fixer API successfully"));
+			}
+		}catch(Exception e){
+			Logger.error("Exception occured while getting the currency conversion response - {}", e.getMessage());
+			resp = new FixerResponse("false",new FixerError(Constants.ERROR_CODE_EXCEPTION,"Exception occured while getting the currency conversion response"+ e.getLocalizedMessage()));
+		}
+		return resp;
+	}
+}

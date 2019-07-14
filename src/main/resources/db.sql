@@ -21,4 +21,14 @@ CREATE TABLE account(
 --INSERT INTO users(firstName, lastName, email) VALUES ('Mark','Boucher','mark.b@email.com');
 --INSERT INTO users(firstName, lastName, email) VALUES ('Steve','Waugh','steve.w@email.com');
 
+CREATE TABLE transaction(
+  transactionId LONG(20) NOT NULL PRIMARY KEY,
+  accountFrom VARCHAR(20) NOT NULL,
+  accountTo VARCHAR(20) NOT NULL,
+  amount DECIMAL(10) NOT NULL,
+  notes VARCHAR(100),
+  createdAt TIMESTAMP(6),
+  currencyCode VARCHAR(5) NOT NULL,
+);
+
 commit;

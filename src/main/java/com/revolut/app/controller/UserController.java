@@ -58,7 +58,7 @@ public class UserController {
     @GET
     @Path("/account/all/{email}")
     public AppResponse getAllAccountForUser(@PathParam("email") String email) {
-    	Logger.info("Request received for getting all the accounts of user");
+    	Logger.info("Request received for getting all the accounts of user [{}]", email);
     	return userSvc.getAccountsByUser(email);
     }
 

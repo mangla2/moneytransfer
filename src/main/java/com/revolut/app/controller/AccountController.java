@@ -1,9 +1,11 @@
 package com.revolut.app.controller;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -42,5 +44,19 @@ public class AccountController {
         return acctSvc.createAccount(account);
     }
 
+    @DELETE
+    @Path("/delete/{accountNumber}")
+    public AppResponse deleteAccount(@PathParam("accountNumber") String accountNumber) {
+    	Logger.info("Request received for deleting the account {}", accountNumber);
+        return acctSvc.deleteAccountByAccountNumber(accountNumber);
+    }
+    
+    @GET
+    @Path("/statement/{accountNumber}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public AppResponse getAllTransationsByAccountNumber(@PathParam("accountNumber") String accountNumber) {
+    	Logger.info("Request received for getting the statement for account {}", accountNumber);
+    	return acctSvc.getAllAccounts();
+    }
     
 }

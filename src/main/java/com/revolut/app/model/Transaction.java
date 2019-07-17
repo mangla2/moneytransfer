@@ -3,6 +3,10 @@ package com.revolut.app.model;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
 public class Transaction {
 
 	private String transactionId;
@@ -10,16 +14,49 @@ public class Transaction {
 	private BigDecimal creditAmount;
 	private Account from;
 	private Account to;
+	private String accountFrom;
+	private String accountTo;
 	private String notes;
-	private ZonedDateTime createdAt;
+	private String createdAt;
 	
+	/**
+	 * @param transactionId
+	 * @param debitAmount
+	 * @param from
+	 * @param to
+	 * @param notes
+	 * @param createdAt
+	 */
+	public Transaction(String transactionId, BigDecimal debitAmount, String from, String to, String notes,
+			String createdAt) {
+		super();
+		this.transactionId = transactionId;
+		this.debitAmount = debitAmount;
+		this.accountFrom = from;
+		this.accountTo = to;
+		this.notes = notes;
+		this.createdAt = createdAt;
+	}
+	
+	/**
+	 * @param transactionId
+	 * @param debitAmount
+	 * @param createdAt
+	 */
+	public Transaction(String transactionId, BigDecimal debitAmount, String createdAt) {
+		super();
+		this.transactionId = transactionId;
+		this.debitAmount = debitAmount;
+		this.createdAt = createdAt;
+	}
+
 	public Transaction(Account accountFrom, Account accountTo, BigDecimal debitAmt, BigDecimal creditAmt, String notes) {
         this.from = accountFrom;
         this.to = accountTo;
         this.debitAmount = debitAmt;
         this.creditAmount= creditAmt;
         this.notes = notes;
-        this.createdAt = ZonedDateTime.now();
+        this.createdAt = String.valueOf(ZonedDateTime.now().toInstant().getEpochSecond() * 1000L);
     }
 	
 	/**
@@ -75,13 +112,13 @@ public class Transaction {
 	/**
 	 * @return the createdAt
 	 */
-	public ZonedDateTime getCreatedAt() {
+	public String getCreatedAt() {
 		return createdAt;
 	}
 	/**
 	 * @param createdAt the createdAt to set
 	 */
-	public void setCreatedAt(ZonedDateTime createdAt) {
+	public void setCreatedAt(String createdAt) {
 		this.createdAt = createdAt;
 	}
 

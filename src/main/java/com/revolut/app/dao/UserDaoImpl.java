@@ -56,7 +56,7 @@ public class UserDaoImpl implements UserDao {
 			dbConn.savePrepareStatement(connection, statement, criteria);
 			int affectedRows = statement.executeUpdate();
 			if (affectedRows == 0) {
-				Logger.error("saveUsern(): Creating user failed, no rows affected." + user);
+				Logger.error("saveUser(): Creating user failed, no rows affected." + user);
 				return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_PROCESSING,"Creating user failed, no rows affected."));
 			}
 

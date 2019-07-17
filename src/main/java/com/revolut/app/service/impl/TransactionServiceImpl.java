@@ -10,8 +10,6 @@ import org.json.JSONObject;
 import com.revolut.app.constants.Constants;
 import com.revolut.app.dao.AccountDao;
 import com.revolut.app.dao.AccountDaoImpl;
-import com.revolut.app.dao.UserDao;
-import com.revolut.app.dao.UserDaoImpl;
 import com.revolut.app.model.Account;
 import com.revolut.app.model.AppResponse;
 import com.revolut.app.model.ErrorDetails;
@@ -128,11 +126,19 @@ public class TransactionServiceImpl implements TransactionService {
 		if(!resp.isStatus()){
 			errMsg = "Transaction failed to happen";
 			Logger.error(errMsg);
+			return new AppResponse(false, "Transaction failed", resp.getError());
 		}
 
-		return resp;
+		Transaction transx = (Transaction) resp.getData();
+		
+		resp = accountDao.getTransactionByTransactionId(transx.getTransactionId());
+		if(!resp.isStatus()){
+			return resp;
+		}
+		
+		transx = (Transaction) resp.getData();
+		Transaction respObj = new Transaction(transx.getTransactionId(), transx.getDebitAmount(), transx.getCreatedAt());
+		return new AppResponse(true, respObj, "Transaction is successful");
 	}
-
-
 
 }

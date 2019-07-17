@@ -63,7 +63,8 @@ public class UserServiceImpl implements UserService {
 
 		Logger.info("Creating an account for user having email {}", user.getEmail());
 		long userId = user.getId();
-		resp = accountDao.createAccount(new Account(user.getEmail(), userId, new BigDecimal(5000), "INR"));
+		String currencyCode = (StringUtils.isNullOrEmpty(user.getCurrencyCode()))  ? "INR" : user.getCurrencyCode();
+		resp = accountDao.createAccount(new Account(user.getEmail(), userId, new BigDecimal(5000), currencyCode));
 		if(!resp.isStatus()){
 			userDao.deleteUser(user.getEmail());
 			return new AppResponse(false, "User cannot be created", new ErrorDetails(Constants.ERROR_CODE_PROCESSING, "Account failed to create hence deleting the user"));

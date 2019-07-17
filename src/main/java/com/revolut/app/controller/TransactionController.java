@@ -13,7 +13,7 @@ import com.revolut.app.model.AppResponse;
 import com.revolut.app.service.TransactionService;
 import com.revolut.app.service.impl.TransactionServiceImpl;
 
-@Path("/user/account")
+@Path("/transaction")
 @Produces(MediaType.APPLICATION_JSON)
 public class TransactionController {
 
@@ -25,7 +25,6 @@ public class TransactionController {
 	}
 	
 	@POST
-    @Path("/transaction")
     @Consumes(MediaType.APPLICATION_JSON)
     public AppResponse transfer(String transaction) {
     	Logger.info("Request received for transfering the money {}", transaction);

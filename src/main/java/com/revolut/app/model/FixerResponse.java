@@ -4,18 +4,18 @@ import org.json.JSONObject;
 
 public class FixerResponse {
 
-	private String success;
+	private boolean success;
 	private String timestamp;
 	private String base;
 	private String date;
-	private JSONObject rates;
+	private Object rates;
 	private FixerError error;
 	
 	/**
 	 * @param success
 	 * @param error
 	 */
-	public FixerResponse(String success, FixerError error) {
+	public FixerResponse(boolean success, FixerError error) {
 		super();
 		this.success = success;
 		this.error = error;
@@ -41,13 +41,13 @@ public class FixerResponse {
 	/**
 	 * @return the success
 	 */
-	public String getSuccess() {
+	public boolean getSuccess() {
 		return success;
 	}
 	/**
 	 * @param success the success to set
 	 */
-	public void setSuccess(String success) {
+	public void setSuccess(boolean success) {
 		this.success = success;
 	}
 	/**
@@ -89,13 +89,13 @@ public class FixerResponse {
 	/**
 	 * @return the rates
 	 */
-	public JSONObject getRates() {
+	public Object getRates() {
 		return rates;
 	}
 	/**
 	 * @param rates the rates to set
 	 */
-	public void setRates(JSONObject rates) {
+	public void setRates(Object rates) {
 		this.rates = rates;
 	}
 	

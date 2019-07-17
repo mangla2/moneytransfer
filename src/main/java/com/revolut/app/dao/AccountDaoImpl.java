@@ -4,7 +4,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -132,8 +137,8 @@ public class AccountDaoImpl implements AccountDao {
 			try (ResultSet rs = statement.executeQuery();) {
 				if (rs.next()) {
 					account = new Account(
-							rs.getString(Constants.ACCOUNT_NUMBER),
 							rs.getInt(Constants.ACCOUNT_USER),
+							rs.getString(Constants.ACCOUNT_NUMBER),
 							rs.getBigDecimal(Constants.ACCOUNT_BALANCE),
 							rs.getString(Constants.ACCOUNT_CURRENCY_CODE)
 							);
@@ -168,17 +173,17 @@ public class AccountDaoImpl implements AccountDao {
 			try (Connection connection = dbConn.getConnection()){
 				connection.setAutoCommit(false);
 
-				try(PreparedStatement statement = connection.prepareStatement(DbQueries.SAVE_TRANSACTION);
+				try(PreparedStatement statement = connection.prepareStatement(DbQueries.SAVE_TRANSACTION, Statement.RETURN_GENERATED_KEYS);
 						PreparedStatement psUpdate = connection.prepareStatement(DbQueries.UPDATE_ACCOUNT_BALANCE)) {
 
 					LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
 					long transactionId = System.currentTimeMillis();
+					transaction.setTransactionId(String.valueOf(transactionId));
 					criteria.put(Constants.TRANSACTION_ID, transactionId);
 					criteria.put(Constants.ACCOUNT_FROM_NUMBER, from.getAccountNumber());
 					criteria.put(Constants.ACCOUNT_TO_NUMBER, to.getAccountNumber());
 					criteria.put(Constants.AMOUNT, transaction.getDebitAmount());
 					criteria.put(Constants.NOTES, transaction.getNotes());
-					criteria.put(Constants.CREATED_AT, transaction.getCreatedAt());
 					criteria.put(Constants.ACCOUNT_CURRENCY_CODE, from.getCurrencyCode());
 
 					dbConn.savePrepareStatement(connection, statement, criteria);
@@ -187,17 +192,17 @@ public class AccountDaoImpl implements AccountDao {
 					if(result == 1){
 						Logger.debug("Transaction is successful - {}", result);
 					}
-					
+
 					//update from account
 					criteria.clear();
-					criteria.put(Constants.ACCOUNT_BALANCE, transaction.getDebitAmount());
+					criteria.put(Constants.ACCOUNT_BALANCE, from.getBalance());
 					criteria.put(Constants.ACCOUNT_NUMBER, from.getAccountNumber());
 					dbConn.savePrepareStatement(connection, psUpdate, criteria);
 					psUpdate.addBatch();
 
 					// update to account
 					criteria.clear();
-					criteria.put(Constants.ACCOUNT_BALANCE, transaction.getCreditAmount());
+					criteria.put(Constants.ACCOUNT_BALANCE, to.getBalance());
 					criteria.put(Constants.ACCOUNT_NUMBER, to.getAccountNumber());
 					dbConn.savePrepareStatement(connection, psUpdate, criteria);
 					psUpdate.addBatch();
@@ -226,7 +231,47 @@ public class AccountDaoImpl implements AccountDao {
 			Logger.error("Exception occured - {}", e.getMessage());
 			return new AppResponse(false,"Failed to complete the transaction", new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,e.getMessage()));
 		}
+		return new AppResponse(true, transaction);
+	}
 
+	@Override
+	public AppResponse getTransactionsByAccount(String accountNumber) {
+		return null;
+	}
+	
+	@Override
+	public AppResponse getTransactionByTransactionId(String transactionId) {
+		Logger.debug("Starting getAccountByAccountNumber in AccountDaoImpl {}", transactionId);
+		
+		LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
+		criteria.put(Constants.TRANSACTION_ID, transactionId);
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Transaction transaction = null;
+		
+		try (Connection connection = dbConn.getConnection();
+				PreparedStatement statement = connection.prepareStatement(DbQueries.GET_TRANSACTION_BY_ID)){
+			dbConn.savePrepareStatement(connection, statement, criteria);
+			try (ResultSet rs = statement.executeQuery();) {
+				if (rs.next()) {
+					transaction = new Transaction(
+							String.valueOf(rs.getLong(Constants.TRANSACTION_ID)),
+							rs.getBigDecimal(Constants.AMOUNT),
+							rs.getString(Constants.ACCOUNT_FROM_NUMBER),
+							rs.getString(Constants.ACCOUNT_TO_NUMBER),
+							rs.getString(Constants.NOTES),
+							sdf.format(new Date(rs.getTimestamp(Constants.CREATED_AT).getTime()))
+							);
+				}
+			}catch(SQLException e){
+				Logger.error("Exception occured while getting the transaction", e.getMessage());
+				return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured :"+e.getMessage()));
+			}
+		}catch(SQLException e){
+			Logger.error("Exception occured while getting the transaction", e.getMessage());
+			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured : "+e.getMessage()));
+		}
+		
 		return new AppResponse(true, transaction);
 	}
 

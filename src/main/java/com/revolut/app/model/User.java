@@ -22,6 +22,22 @@ public class User {
 	@Email(message = "Email should be valid")
 	private String email;
 	
+	private String currencyCode;
+	
+	/**
+	 * @return the currencyCode
+	 */
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+
+	/**
+	 * @param currencyCode the currencyCode to set
+	 */
+	public void setCurrencyCode(String currencyCode) {
+		this.currencyCode = currencyCode;
+	}
+
 	private List<Account> accounts;
 	
 	public User(){

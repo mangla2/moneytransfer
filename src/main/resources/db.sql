@@ -27,7 +27,7 @@ CREATE TABLE transaction(
   accountTo VARCHAR(20) NOT NULL,
   amount DECIMAL(10) NOT NULL,
   notes VARCHAR(100),
-  createdAt TIMESTAMP(6),
+  createdAt VARCHAR(30),
   currencyCode VARCHAR(5) NOT NULL,
 );
 

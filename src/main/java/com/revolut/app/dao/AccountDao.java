@@ -11,4 +11,6 @@ public interface AccountDao {
 	public AppResponse getAccountByAccountNumber(String accountNumber);
 	public AppResponse deleteAccountByAccountNumber(String accountNumber);
 	public AppResponse makeTrasaction(Transaction transaction);
+	public AppResponse getTransactionsByAccount(String accountNumber);
+	public AppResponse getTransactionByTransactionId(String transactionId);
 }

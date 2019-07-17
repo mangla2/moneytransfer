@@ -6,6 +6,9 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import javax.ws.rs.HttpMethod;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.revolut.app.constants.Constants;
 import com.revolut.app.model.FixerError;
 import com.revolut.app.model.FixerResponse;
@@ -35,6 +39,7 @@ public class CurrencyConverter {
 		if ((fromCurrencyCode != null && !fromCurrencyCode.isEmpty())
 				&& (toCurrencyCode != null && !toCurrencyCode.isEmpty())) {
 
+			try{
 			StringBuilder url = new StringBuilder(BASE_API);
 			url.append(Constants.ACCESS_KEY_PARAM)
 			.append(ACCESS_KEY)
@@ -44,19 +49,24 @@ public class CurrencyConverter {
 			FixerResponse response = getConversionResponse(url.toString());
 
 			if (response != null) {
-				JSONObject rates = response.getRates();
-				String from = rates.getString(fromCurrencyCode);
-				String to = rates.getString(toCurrencyCode);
+				Object rates = response.getRates();
+				Gson gson = new Gson();
+				LinkedHashMap<String,Double> ratesMap = gson.fromJson(rates.toString(), LinkedHashMap.class);
+				Double from = ratesMap.get(fromCurrencyCode);
+				Double to = ratesMap.get(toCurrencyCode);
 
 				if(from == null || to == null){
 					Logger.error("Conversion Currency specified is incorrect or cannot be found for conversion");
 					return conversionRate;
 				}
 
-				double conversionResult = Double.valueOf(from) / Double.valueOf(to);
+				double conversionResult = ("EUR".equalsIgnoreCase(fromCurrencyCode)) ? from*to : from / to;
 				conversionRate = new BigDecimal(conversionResult);
+				conversionRate = conversionRate.setScale(2, BigDecimal.ROUND_HALF_EVEN);
 			}
-
+			}catch(Exception e){
+				Logger.error("Failed to get the conversion rate from third party fixer api - {}", e.getMessage());
+			}
 		}
 		return conversionRate;
 	}
@@ -84,11 +94,11 @@ public class CurrencyConverter {
 				resp = new ObjectMapper().readValue(jsonString.toString(), FixerResponse.class);
 				Logger.info("Response received for conversion rates{}", resp);
 			}else{
-				resp = new FixerResponse("false",new FixerError(Constants.ERROR_CODE_PROCESSING,"Could not connect to Fixer API successfully"));
+				resp = new FixerResponse(false,new FixerError(Constants.ERROR_CODE_PROCESSING,"Could not connect to Fixer API successfully"));
 			}
 		}catch(Exception e){
 			Logger.error("Exception occured while getting the currency conversion response - {}", e.getMessage());
-			resp = new FixerResponse("false",new FixerError(Constants.ERROR_CODE_EXCEPTION,"Exception occured while getting the currency conversion response"+ e.getLocalizedMessage()));
+			resp = new FixerResponse(false,new FixerError(Constants.ERROR_CODE_EXCEPTION,"Exception occured while getting the currency conversion response"+ e.getLocalizedMessage()));
 		}
 		return resp;
 	}

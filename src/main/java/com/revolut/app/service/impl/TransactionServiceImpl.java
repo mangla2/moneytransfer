@@ -122,7 +122,7 @@ public class TransactionServiceImpl implements TransactionService {
 		// calculate the amount to be transferred
 		BigDecimal amountToBeAdded = money.multiply(conversionRate);
 		// transfer the money from one account to another
-		resp = accountDao.makeTrasaction(new Transaction(account1, account2, money, amountToBeAdded, notes));
+		resp = accountDao.makeTransaction(new Transaction(money, account1, account2, notes),amountToBeAdded);
 		if(!resp.isStatus()){
 			errMsg = "Transaction failed to happen";
 			Logger.error(errMsg);
@@ -137,7 +137,7 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		
 		transx = (Transaction) resp.getData();
-		Transaction respObj = new Transaction(transx.getTransactionId(), transx.getDebitAmount(), transx.getCreatedAt());
+		Transaction respObj = new Transaction(transx.getTransactionId(), transx.getAmount(), transx.getCreatedAt());
 		return new AppResponse(true, respObj, "Transaction is successful");
 	}
 

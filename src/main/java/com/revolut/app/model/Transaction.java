@@ -1,7 +1,6 @@
 package com.revolut.app.model;
 
 import java.math.BigDecimal;
-import java.time.ZonedDateTime;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -10,14 +9,23 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class Transaction {
 
 	private String transactionId;
-	private BigDecimal debitAmount;
-	private BigDecimal creditAmount;
+	private BigDecimal amount;
 	private Account from;
 	private Account to;
 	private String accountFrom;
 	private String accountTo;
+	private TRANSACTION_TYPE type;
 	private String notes;
 	private String createdAt;
+	private String currencyCode;
+	
+	public enum TRANSACTION_TYPE {
+		DEBIT, CREDIT
+	}
+	
+	public Transaction(){
+	 super();	
+	}
 	
 	/**
 	 * @param transactionId
@@ -31,13 +39,27 @@ public class Transaction {
 			String createdAt) {
 		super();
 		this.transactionId = transactionId;
-		this.debitAmount = debitAmount;
+		this.amount = debitAmount;
 		this.accountFrom = from;
 		this.accountTo = to;
 		this.notes = notes;
 		this.createdAt = createdAt;
 	}
 	
+	/**
+	 * @param amount
+	 * @param from
+	 * @param to
+	 * @param notes
+	 */
+	public Transaction(BigDecimal amount, Account from, Account to, String notes) {
+		super();
+		this.amount = amount;
+		this.from = from;
+		this.to = to;
+		this.notes = notes;
+	}
+
 	/**
 	 * @param transactionId
 	 * @param debitAmount
@@ -46,19 +68,10 @@ public class Transaction {
 	public Transaction(String transactionId, BigDecimal debitAmount, String createdAt) {
 		super();
 		this.transactionId = transactionId;
-		this.debitAmount = debitAmount;
+		this.amount = debitAmount;
 		this.createdAt = createdAt;
 	}
 
-	public Transaction(Account accountFrom, Account accountTo, BigDecimal debitAmt, BigDecimal creditAmt, String notes) {
-        this.from = accountFrom;
-        this.to = accountTo;
-        this.debitAmount = debitAmt;
-        this.creditAmount= creditAmt;
-        this.notes = notes;
-        this.createdAt = String.valueOf(ZonedDateTime.now().toInstant().getEpochSecond() * 1000L);
-    }
-	
 	/**
 	 * @return the transactionId
 	 */
@@ -123,31 +136,73 @@ public class Transaction {
 	}
 
 	/**
-	 * @return the debitAmount
+	 * @return the amount
 	 */
-	public BigDecimal getDebitAmount() {
-		return debitAmount;
+	public BigDecimal getAmount() {
+		return amount;
 	}
 
 	/**
-	 * @param debitAmount the debitAmount to set
+	 * @param amount the amount to set
 	 */
-	public void setDebitAmount(BigDecimal debitAmount) {
-		this.debitAmount = debitAmount;
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
 	}
 
 	/**
-	 * @return the creditAmount
+	 * @return the accountFrom
 	 */
-	public BigDecimal getCreditAmount() {
-		return creditAmount;
+	public String getAccountFrom() {
+		return accountFrom;
 	}
 
 	/**
-	 * @param creditAmount the creditAmount to set
+	 * @param accountFrom the accountFrom to set
 	 */
-	public void setCreditAmount(BigDecimal creditAmount) {
-		this.creditAmount = creditAmount;
+	public void setAccountFrom(String accountFrom) {
+		this.accountFrom = accountFrom;
 	}
-	
+
+	/**
+	 * @return the accountTo
+	 */
+	public String getAccountTo() {
+		return accountTo;
+	}
+
+	/**
+	 * @param accountTo the accountTo to set
+	 */
+	public void setAccountTo(String accountTo) {
+		this.accountTo = accountTo;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public TRANSACTION_TYPE getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(TRANSACTION_TYPE type) {
+		this.type = type;
+	}
+
+	/**
+	 * @return the currencyCode
+	 */
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+
+	/**
+	 * @param currencyCode the currencyCode to set
+	 */
+	public void setCurrencyCode(String currencyCode) {
+		this.currencyCode = currencyCode;
+	}
+
 }

@@ -57,14 +57,14 @@ public class AccountServiceImpl implements AccountService {
 			Logger.error("User Email is found null or empty");
 			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_VALIDATION, "User Email is found null or empty"));
 		}
-		
+
 		//check if the user exists or not
 		AppResponse resp = userDao.getUserByEmail(account.getEmail());
 		if(!resp.isStatus() || resp.getData() == null){
 			Logger.error("Account cannot be created since user is not registered having email [{}]", account.getEmail());
 			return new AppResponse(false, "Account cannot be created since user is not registered",new ErrorDetails(Constants.ERROR_CODE_VALIDATION, "User is not registered"));
 		}
-		
+
 		User u = (User) resp.getData();
 		account.setUserId(u.getId());
 		return accountDao.createAccount(account);
@@ -75,53 +75,66 @@ public class AccountServiceImpl implements AccountService {
 	public AppResponse getAccountByAccountNumber(String accountNumber){
 		Logger.debug("Starting deleteAccountByAccountNumber() in AccountServiceImpl for [{}]", accountNumber);
 		AppResponse resp = null;
-		
+
 		if(StringUtils.isNullOrEmpty(accountNumber)){
 			Logger.error("Failed to delete the account as the account number is null/empty");
 			return new AppResponse(false,"Failed to delete the account as the account number is null/empty", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account Number is found null/empty"));
 		}
-		
+
 		// check if account exists or not
 		resp = accountDao.getAccountByAccountNumber(accountNumber);
 		if(!resp.isStatus() || resp.getData() == null){
 			Logger.error("Failed to delete as the account is not found");
 			return new AppResponse(false,"Failed to delete as the account is not found", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account is not found in db for requested account number"));
 		}
-		
+
 		//if account exists, then delete
 		resp = accountDao.deleteAccountByAccountNumber(accountNumber);
 		if(!resp.isStatus()){
 			return new AppResponse(false, "Account not found in Db", resp.getError());
 		}
-		
+
 		Logger.info("Account deleted successfully having account number [{}]", accountNumber);
 		return resp;
 	}
-	
+
 	@Override
 	public AppResponse deleteAccountByAccountNumber(String accountNumber){
 		Logger.debug("Starting deleteAccountByAccountNumber() in AccountServiceImpl for [{}]", accountNumber);
 		AppResponse resp = null;
-		
+
 		if(StringUtils.isNullOrEmpty(accountNumber)){
 			Logger.error("Failed to delete the account as the account number is null/empty");
 			return new AppResponse(false,"Failed to delete the account as the account number is null/empty", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account Number is found null/empty"));
 		}
-		
+
 		// check if account exists or not
 		resp = accountDao.getAccountByAccountNumber(accountNumber);
 		if(!resp.isStatus() || resp.getData() == null){
 			Logger.error("Failed to delete as the account is not found");
 			return new AppResponse(false,"Failed to delete as the account is not found", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account is not found in db for requested account number"));
 		}
-		
+
 		//if account exists, then delete
 		resp = accountDao.deleteAccountByAccountNumber(accountNumber);
 		if(!resp.isStatus()){
 			return new AppResponse(false, "Account not found in Db", resp.getError());
 		}
-		
+
 		Logger.info("Account deleted successfully having account number [{}]", accountNumber);
 		return resp;
 	}
+
+	@Override
+	public AppResponse getTransactionHistoryByAccount(String accountNumber) {
+		Logger.debug("Starting getTransactionHistoryByAccount() in AccountServiceImpl for [{}]", accountNumber);
+
+		if(StringUtils.isNullOrEmpty(accountNumber)){
+			Logger.error("Failed to delete the account as the account number is null/empty");
+			return new AppResponse(false,"Failed to delete the account as the account number is null/empty", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account Number is found null/empty"));
+		}
+
+		return accountDao.getTransactionsByAccount(accountNumber);
+	}
+
 }

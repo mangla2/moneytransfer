@@ -1,5 +1,6 @@
 package com.revolut.app.dao;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,12 +25,14 @@ import com.revolut.app.model.Account;
 import com.revolut.app.model.AppResponse;
 import com.revolut.app.model.ErrorDetails;
 import com.revolut.app.model.Transaction;
+import com.revolut.app.model.Transaction.TRANSACTION_TYPE;
 
 public class AccountDaoImpl implements AccountDao {
 
 	private static final Logger Logger = LogManager.getLogger(AccountDaoImpl.class);
 	private static AccountDaoImpl instance = null;
 	DbUtils dbConn = null;
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private AccountDaoImpl(){
 		dbConn = DbUtils.getInstance();
@@ -155,20 +158,20 @@ public class AccountDaoImpl implements AccountDao {
 	}
 
 	@Override
-	public synchronized AppResponse makeTrasaction(Transaction transaction) {
+	public synchronized AppResponse makeTransaction(Transaction transaction, BigDecimal amountConverted) {
 		Logger.debug("Initiating the transaction {}", transaction);
 
 		Account from = transaction.getFrom();
 		Account to = transaction.getTo();
 
 		try{
-			while(from.getBalance().compareTo(transaction.getDebitAmount()) < 0){
+			while(from.getBalance().compareTo(transaction.getAmount()) < 0){
 				wait();
 			}
 
 			// update accounts balance
-			from.setBalance(from.getBalance().subtract(transaction.getDebitAmount()));
-			to.setBalance(to.getBalance().add(transaction.getCreditAmount()));
+			from.setBalance(from.getBalance().subtract(transaction.getAmount()));
+			to.setBalance(to.getBalance().add(amountConverted));
 
 			try (Connection connection = dbConn.getConnection()){
 				connection.setAutoCommit(false);
@@ -182,7 +185,7 @@ public class AccountDaoImpl implements AccountDao {
 					criteria.put(Constants.TRANSACTION_ID, transactionId);
 					criteria.put(Constants.ACCOUNT_FROM_NUMBER, from.getAccountNumber());
 					criteria.put(Constants.ACCOUNT_TO_NUMBER, to.getAccountNumber());
-					criteria.put(Constants.AMOUNT, transaction.getDebitAmount());
+					criteria.put(Constants.AMOUNT, transaction.getAmount());
 					criteria.put(Constants.NOTES, transaction.getNotes());
 					criteria.put(Constants.ACCOUNT_CURRENCY_CODE, from.getCurrencyCode());
 
@@ -236,24 +239,65 @@ public class AccountDaoImpl implements AccountDao {
 
 	@Override
 	public AppResponse getTransactionsByAccount(String accountNumber) {
-		return null;
+		Logger.debug("Starting getTransactionsByAccount in AccountDaoImpl for account : {}", accountNumber);
+		List<Transaction> transactionList = new ArrayList<>();
+
+		LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
+		criteria.put(Constants.ACCOUNT_FROM_NUMBER, accountNumber);
+		criteria.put(Constants.ACCOUNT_TO_NUMBER, accountNumber);
+		
+		try (Connection connection = dbConn.getConnection();
+				PreparedStatement statement = connection.prepareStatement(DbQueries.GET_TRANSACTIONS_BY_ACCOUNT_NUM)){
+			dbConn.savePrepareStatement(connection, statement, criteria);
+			try (ResultSet rs = statement.executeQuery();) {
+				while (rs.next()) {
+					Transaction transaction = new Transaction();
+					transaction.setTransactionId(String.valueOf(rs.getLong(Constants.TRANSACTION_ID)));
+					
+					String from = rs.getString(Constants.ACCOUNT_FROM_NUMBER);
+					String to = rs.getString(Constants.ACCOUNT_TO_NUMBER);
+					
+					TRANSACTION_TYPE type = (accountNumber.equalsIgnoreCase(from)) ? TRANSACTION_TYPE.DEBIT : TRANSACTION_TYPE.CREDIT;
+					transaction.setType(type);
+					
+					if(TRANSACTION_TYPE.DEBIT.equals(type)){
+						transaction.setAccountTo(from);
+					}else{
+						transaction.setAccountFrom(to);
+					}
+					
+					transaction.setAmount(rs.getBigDecimal(Constants.AMOUNT));
+					transaction.setCurrencyCode(rs.getString(Constants.ACCOUNT_CURRENCY_CODE));
+					transaction.setNotes(rs.getString(Constants.NOTES));
+					transaction.setCreatedAt(sdf.format(new Date(rs.getTimestamp(Constants.CREATED_AT).getTime())));
+					transactionList.add(transaction);
+				}
+			}catch(SQLException e){
+				Logger.error("Exception occured while getting all the transactions for accountnumber {} - {}", accountNumber, e.getMessage());
+				return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured :"+e.getMessage()));
+			}
+		}catch(SQLException e){
+			Logger.error("Exception occured while getting all the transactions for accountnumber {} - {}", accountNumber, e.getMessage());
+			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured :"+e.getMessage()));
+		}
+		Logger.info("Transaction History returned from db {}", transactionList);
+		return new AppResponse(true, transactionList);
 	}
 	
 	@Override
 	public AppResponse getTransactionByTransactionId(String transactionId) {
-		Logger.debug("Starting getAccountByAccountNumber in AccountDaoImpl {}", transactionId);
+		Logger.debug("Starting getTransactionByTransactionId in AccountDaoImpl {}", transactionId);
 		
 		LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
 		criteria.put(Constants.TRANSACTION_ID, transactionId);
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Transaction transaction = null;
 		
 		try (Connection connection = dbConn.getConnection();
 				PreparedStatement statement = connection.prepareStatement(DbQueries.GET_TRANSACTION_BY_ID)){
 			dbConn.savePrepareStatement(connection, statement, criteria);
 			try (ResultSet rs = statement.executeQuery();) {
-				if (rs.next()) {
+				while (rs.next()) {
 					transaction = new Transaction(
 							String.valueOf(rs.getLong(Constants.TRANSACTION_ID)),
 							rs.getBigDecimal(Constants.AMOUNT),

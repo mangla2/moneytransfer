@@ -8,4 +8,5 @@ public interface AccountService {
 	public AppResponse createAccount(Account account);
 	public AppResponse getAccountByAccountNumber(String accountNumber);
 	public AppResponse deleteAccountByAccountNumber(String accountNumber);
+	public AppResponse getTransactionHistoryByAccount(String accountNumber);
 }

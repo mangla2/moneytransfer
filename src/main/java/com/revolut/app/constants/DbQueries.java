@@ -15,5 +15,6 @@ public class DbQueries {
 	public static final String SAVE_TRANSACTION = "INSERT INTO transaction(transactionId,accountFrom,accountTo,amount,notes,createdAt,currencyCode) VALUES(?,?,?,?,?,NOW(),?)";
 	public static final String UPDATE_ACCOUNT_BALANCE = "UPDATE ACCOUNT SET balance= ? WHERE accountNumber= ?";
 	public static final String GET_TRANSACTION_BY_ID = "SELECT * FROM TRANSACTION WHERE transactionId= ?";
+	public static final String GET_TRANSACTIONS_BY_ACCOUNT_NUM = "SELECT * FROM TRANSACTION WHERE accountFrom = ? OR accountTo = ?";
 	
 }

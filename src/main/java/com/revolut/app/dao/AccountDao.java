@@ -13,6 +13,7 @@ public interface AccountDao {
 	public AppResponse getAccountByAccountNumber(String accountNumber);
 	public AppResponse deleteAccountByAccountNumber(String accountNumber);
 	public AppResponse makeTransaction(Transaction transaction,BigDecimal amountConverted);
+	public AppResponse updateBalance(Account account, BigDecimal amount);
 	public AppResponse getTransactionsByAccount(String accountNumber);
 	public AppResponse getTransactionByTransactionId(String transactionId);
 }

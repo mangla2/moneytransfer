@@ -6,9 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -317,6 +315,29 @@ public class AccountDaoImpl implements AccountDao {
 		}
 		
 		return new AppResponse(true, transaction);
+	}
+
+	@Override
+	public AppResponse updateBalance(Account account, BigDecimal amount) {
+		Logger.debug("Starting updateBalance in AccountDaoImpl for accountNumber {}", account.getAccountNumber());
+		LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
+		criteria.put(Constants.AMOUNT, account.getBalance());
+		criteria.put(Constants.ACCOUNT_NUMBER, account.getAccountNumber());
+		
+		Logger.info("Updating amount [{}] to account for user having accountNumber as [{}]", amount, account.getAccountNumber());
+		try (Connection connection = dbConn.getConnection();
+				PreparedStatement statement = connection.prepareStatement(DbQueries.UPDATE_ACCOUNT_BALANCE)) {
+			dbConn.savePrepareStatement(connection, statement, criteria);
+			int affectedRows = statement.executeUpdate();
+			
+			if(affectedRows == 1){
+				Logger.info("Amount {} updated successfully to the account {}", amount, account.getAccountNumber());
+			}
+		}catch(SQLException e){
+			Logger.error("Exception occured while updating money to an account - {}", e.getMessage());
+			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION, "Exception occured :"+e.getMessage()));
+		}
+		return new AppResponse(true, null);
 	}
 
 }

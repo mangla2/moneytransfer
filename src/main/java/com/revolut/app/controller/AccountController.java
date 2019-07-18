@@ -1,5 +1,7 @@
 package com.revolut.app.controller;
 
+import java.math.BigDecimal;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -7,6 +9,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.logging.log4j.LogManager;
@@ -52,11 +55,26 @@ public class AccountController {
     }
     
     @GET
-    @Path("/transactions/{accountNumber}")
+    @Path("/transfer/{accountNumber}")
     @Produces(MediaType.APPLICATION_JSON)
     public AppResponse getAllTransationsByAccountNumber(@PathParam("accountNumber") String accountNumber) {
     	Logger.info("Request received for getting the statement for account {}", accountNumber);
     	return acctSvc.getTransactionHistoryByAccount(accountNumber);
     }
     
+    @POST
+    @Path("/deposit/{accountNumber}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public AppResponse deposit(@PathParam("accountNumber") String accountNumber, @QueryParam("amount") BigDecimal amount) {
+    	Logger.info("Request received for depositing amount [{}] to the account {}", amount, accountNumber);
+        return acctSvc.deposit(accountNumber, amount);
+    }
+    
+    @POST
+    @Path("/withdraw/{accountNumber}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public AppResponse withdraw(@PathParam("accountNumber") String accountNumber, @QueryParam("amount") BigDecimal amount) {
+    	Logger.info("Request received for depositing amount [{}] to the account {}", amount, accountNumber);
+        return acctSvc.withdraw(accountNumber, amount);
+    }
 }

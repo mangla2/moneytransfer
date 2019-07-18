@@ -243,7 +243,7 @@ public class AccountDaoImpl implements AccountDao {
 		LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
 		criteria.put(Constants.ACCOUNT_FROM_NUMBER, accountNumber);
 		criteria.put(Constants.ACCOUNT_TO_NUMBER, accountNumber);
-		
+
 		try (Connection connection = dbConn.getConnection();
 				PreparedStatement statement = connection.prepareStatement(DbQueries.GET_TRANSACTIONS_BY_ACCOUNT_NUM)){
 			dbConn.savePrepareStatement(connection, statement, criteria);
@@ -251,21 +251,27 @@ public class AccountDaoImpl implements AccountDao {
 				while (rs.next()) {
 					Transaction transaction = new Transaction();
 					transaction.setTransactionId(String.valueOf(rs.getLong(Constants.TRANSACTION_ID)));
-					
+
 					String from = rs.getString(Constants.ACCOUNT_FROM_NUMBER);
 					String to = rs.getString(Constants.ACCOUNT_TO_NUMBER);
-					
+
 					TRANSACTION_TYPE type = (accountNumber.equalsIgnoreCase(from)) ? TRANSACTION_TYPE.DEBIT : TRANSACTION_TYPE.CREDIT;
 					transaction.setType(type);
-					
+
 					if(TRANSACTION_TYPE.DEBIT.equals(type)){
-						transaction.setAccountTo(from);
+						transaction.setAccountTo(to);
 					}else{
-						transaction.setAccountFrom(to);
+						transaction.setAccountFrom(from);
 					}
-					
+
 					transaction.setAmount(rs.getBigDecimal(Constants.AMOUNT));
 					transaction.setCurrencyCode(rs.getString(Constants.ACCOUNT_CURRENCY_CODE));
+					String notes = rs.getString(Constants.NOTES);
+					
+					if(from.equalsIgnoreCase(to)){
+						transaction.setType(Enum.valueOf(TRANSACTION_TYPE.class, notes));
+					}
+					
 					transaction.setNotes(rs.getString(Constants.NOTES));
 					transaction.setCreatedAt(sdf.format(new Date(rs.getTimestamp(Constants.CREATED_AT).getTime())));
 					transactionList.add(transaction);
@@ -281,16 +287,16 @@ public class AccountDaoImpl implements AccountDao {
 		Logger.info("Transaction History returned from db {}", transactionList);
 		return new AppResponse(true, transactionList);
 	}
-	
+
 	@Override
 	public AppResponse getTransactionByTransactionId(String transactionId) {
 		Logger.debug("Starting getTransactionByTransactionId in AccountDaoImpl {}", transactionId);
-		
+
 		LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
 		criteria.put(Constants.TRANSACTION_ID, transactionId);
-		
+
 		Transaction transaction = null;
-		
+
 		try (Connection connection = dbConn.getConnection();
 				PreparedStatement statement = connection.prepareStatement(DbQueries.GET_TRANSACTION_BY_ID)){
 			dbConn.savePrepareStatement(connection, statement, criteria);
@@ -313,31 +319,83 @@ public class AccountDaoImpl implements AccountDao {
 			Logger.error("Exception occured while getting the transaction", e.getMessage());
 			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,"Exception occured : "+e.getMessage()));
 		}
-		
+
 		return new AppResponse(true, transaction);
 	}
 
 	@Override
-	public AppResponse updateBalance(Account account, BigDecimal amount) {
+	public synchronized AppResponse updateBalance(Account account, BigDecimal amount, TRANSACTION_TYPE type) {
 		Logger.debug("Starting updateBalance in AccountDaoImpl for accountNumber {}", account.getAccountNumber());
-		LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
-		criteria.put(Constants.AMOUNT, account.getBalance());
-		criteria.put(Constants.ACCOUNT_NUMBER, account.getAccountNumber());
-		
-		Logger.info("Updating amount [{}] to account for user having accountNumber as [{}]", amount, account.getAccountNumber());
-		try (Connection connection = dbConn.getConnection();
-				PreparedStatement statement = connection.prepareStatement(DbQueries.UPDATE_ACCOUNT_BALANCE)) {
-			dbConn.savePrepareStatement(connection, statement, criteria);
-			int affectedRows = statement.executeUpdate();
-			
-			if(affectedRows == 1){
-				Logger.info("Amount {} updated successfully to the account {}", amount, account.getAccountNumber());
+        String notes = TRANSACTION_TYPE.CREDIT.name();
+        Transaction transaction = new Transaction();
+        
+		try{
+			if(TRANSACTION_TYPE.DEBIT.equals(type)){
+				notes = TRANSACTION_TYPE.DEBIT.name();
+				while(account.getBalance().compareTo(amount) < 0){
+					wait();
+				}
 			}
-		}catch(SQLException e){
-			Logger.error("Exception occured while updating money to an account - {}", e.getMessage());
-			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION, "Exception occured :"+e.getMessage()));
+
+			try (Connection connection = dbConn.getConnection()){
+				connection.setAutoCommit(false);
+
+				try(PreparedStatement statement = connection.prepareStatement(DbQueries.SAVE_TRANSACTION, Statement.RETURN_GENERATED_KEYS);
+						PreparedStatement psUpdate = connection.prepareStatement(DbQueries.UPDATE_ACCOUNT_BALANCE)) {
+
+					LinkedHashMap<String,Object> criteria = new LinkedHashMap<>();
+					long transactionId = System.currentTimeMillis();
+					criteria.put(Constants.TRANSACTION_ID, transactionId);
+					criteria.put(Constants.ACCOUNT_FROM_NUMBER, account.getAccountNumber());
+					criteria.put(Constants.ACCOUNT_TO_NUMBER, account.getAccountNumber());
+					criteria.put(Constants.AMOUNT, amount);
+					criteria.put(Constants.NOTES, notes);
+					criteria.put(Constants.ACCOUNT_CURRENCY_CODE, account.getCurrencyCode());
+
+					dbConn.savePrepareStatement(connection, statement, criteria);
+					int result = statement.executeUpdate();
+
+					if(result == 1){
+						Logger.debug("Transaction is successful - {}", result);
+					}
+
+					//update from account
+					criteria.clear();
+					criteria.put(Constants.AMOUNT, account.getBalance());
+					criteria.put(Constants.ACCOUNT_NUMBER, account.getAccountNumber());
+					dbConn.savePrepareStatement(connection, psUpdate, criteria);
+
+					int affectedRows = psUpdate.executeUpdate();
+
+					if(affectedRows == 1){
+						Logger.info("Amount {} updated successfully to the account {}", amount, account.getAccountNumber());
+					}
+
+					if(affectedRows + result == 2){
+						connection.commit();
+						transaction.setTransactionId(String.valueOf(transactionId));
+						transaction.setAmount(amount);
+						transaction.setNotes(notes);
+						transaction.setAccountFrom(account.getAccountNumber());
+						transaction.setAccountTo(account.getAccountNumber());
+						account.getTransactionsList().add(transaction);
+					}
+				}catch(InternalServerError e){
+					connection.rollback();
+					connection.setAutoCommit(true);
+					Logger.error("Exception occured - {}", e.getMessage());
+					return new AppResponse(false,"Failed to complete the transaction", new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,e.getMessage()));
+				}
+			}catch(SQLException e){
+				Logger.error("Exception occured - {}", e.getMessage());
+				return new AppResponse(false,"Failed to complete the transaction", new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,e.getMessage()));
+			}
+			notifyAll();
+		}catch(InterruptedException e){
+			Logger.error("Exception occured - {}", e.getMessage());
+			return new AppResponse(false,"Failed to update the balance", new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,e.getMessage()));
 		}
-		return new AppResponse(true, null);
+		return new AppResponse(true, transaction);
 	}
 
 }

@@ -85,6 +85,7 @@ public class TransactionServiceImpl implements TransactionService {
 		String notes = request.getString("notes");
 		
 		Logger.info("Starting transferMoney in TransactionServiceImpl from [{}] to [{}]", accountFrom, accountTo);	
+		
 		//check whether account1 and account2 exists in db
 		Account account1 = (Account)accountDao.getAccountByAccountNumber(accountFrom).getData();
 		Account account2 = (Account)accountDao.getAccountByAccountNumber(accountTo).getData();
@@ -110,6 +111,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 		BigDecimal conversionRate = new BigDecimal(1);
 		if(!account1.getCurrencyCode().equalsIgnoreCase(account2.getCurrencyCode())){
+			
 			//get the conversion rate
 			conversionRate = CurrencyConverter.getConversionRate(account1.getCurrencyCode(), account2.getCurrencyCode());
 			if(conversionRate == BigDecimal.ZERO){
@@ -121,6 +123,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 		// calculate the amount to be transferred
 		BigDecimal amountToBeAdded = money.multiply(conversionRate);
+		
 		// transfer the money from one account to another
 		resp = accountDao.makeTransaction(new Transaction(money, account1, account2, notes),amountToBeAdded);
 		if(!resp.isStatus()){

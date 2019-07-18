@@ -1,6 +1,7 @@
 package com.revolut.app.service.impl;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +14,10 @@ import com.revolut.app.dao.UserDao;
 import com.revolut.app.dao.UserDaoImpl;
 import com.revolut.app.model.Account;
 import com.revolut.app.model.AppResponse;
+import com.revolut.app.model.BankStatement;
 import com.revolut.app.model.ErrorDetails;
+import com.revolut.app.model.Transaction;
+import com.revolut.app.model.Transaction.TRANSACTION_TYPE;
 import com.revolut.app.model.User;
 import com.revolut.app.service.AccountService;
 
@@ -79,15 +83,15 @@ public class AccountServiceImpl implements AccountService {
 		AppResponse resp = null;
 
 		if(StringUtils.isNullOrEmpty(accountNumber)){
-			Logger.error("Failed to delete the account as the account number is null/empty");
+			Logger.error("Failed to get the account as the account number is null/empty");
 			return new AppResponse(false,"Failed to delete the account as the account number is null/empty", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account Number is found null/empty"));
 		}
 
 		// check if account exists or not
 		resp = accountDao.getAccountByAccountNumber(accountNumber);
 		if(!resp.isStatus() || resp.getData() == null){
-			Logger.error("Failed to delete as the account is not found");
-			return new AppResponse(false,"Failed to delete as the account is not found", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account is not found in db for requested account number"));
+			Logger.error("Failed to get as the account is not found");
+			return new AppResponse(false,"Failed to get as the account is not found", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account is not found in db for requested account number"));
 		}
 
 		//if account exists, then delete
@@ -130,21 +134,39 @@ public class AccountServiceImpl implements AccountService {
 	@Override
 	public AppResponse getTransactionHistoryByAccount(String accountNumber) {
 		Logger.debug("Starting getTransactionHistoryByAccount() in AccountServiceImpl for [{}]", accountNumber);
+		AppResponse resp = null;
 
 		if(StringUtils.isNullOrEmpty(accountNumber)){
-			Logger.error("Failed to delete the account as the account number is null/empty");
-			return new AppResponse(false,"Failed to delete the account as the account number is null/empty", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account Number is found null/empty"));
+			Logger.error("Failed to get bank statement as the account number is null/empty");
+			return new AppResponse(false,"Failed to get bank statement as the account number is null/empty", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account Number is found null/empty"));
 		}
 
-		return accountDao.getTransactionsByAccount(accountNumber);
+		// check if account exists or not
+		resp = accountDao.getAccountByAccountNumber(accountNumber);
+		if(!resp.isStatus() || resp.getData() == null){
+			Logger.error("Account not found in database");
+			return new AppResponse(false, "Account not found", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account is not found in db for requested account number"));
+		}
+
+		Account account = (Account)resp.getData();
+		
+		resp = accountDao.getTransactionsByAccount(accountNumber);
+		if(!resp.isStatus()){
+			Logger.error("Failed to get the transaction history");
+			return resp;
+		}
+		
+		List<Transaction> transactionList = (List)resp.getData();
+		BigDecimal totalBalance = account.getBalance();
+		return new AppResponse(true, new BankStatement(totalBalance, account.getCurrencyCode(), transactionList));
 	}
 
 	@Override
 	public AppResponse deposit(String accountNumber, BigDecimal amount) {
 		Logger.debug("Starting deposit() in AccountServiceImpl for [{}]", accountNumber);
 		AppResponse resp = null;
-        String errMsg = "Failed to deposit amount to the account as the account number";
-		
+		String errMsg = "Failed to deposit amount to the account as the account number";
+
 		if(StringUtils.isNullOrEmpty(accountNumber)){
 			Logger.error(errMsg + "is null/empty");
 			return new AppResponse(false, errMsg + "is null/empty", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account Number is found null/empty"));
@@ -156,16 +178,16 @@ public class AccountServiceImpl implements AccountService {
 			Logger.error(errMsg + "is not found");
 			return new AppResponse(false, errMsg + "is not found", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account is not found in db for requested account number"));
 		}
-		
+
 		Account account = (Account) resp.getData();
 		account.setBalance(account.getBalance().add(amount));
-		resp =  accountDao.updateBalance(account, amount);
-		
+		resp =  accountDao.updateBalance(account, amount, TRANSACTION_TYPE.CREDIT);
+
 		if(!resp.isStatus()){
 			Logger.error("Failed to deposit amount to the account {} ", accountNumber);
 			return new AppResponse(false, "Failed to deposit amount to the account", resp.getError());
 		}
-		
+
 		Logger.info("Amount {} deposited successfully to the account {}", amount, accountNumber);
 		return new AppResponse(true, "Amount " + amount + account.getCurrencyCode() +" has been deposited successfully");
 	}
@@ -175,7 +197,7 @@ public class AccountServiceImpl implements AccountService {
 		Logger.debug("Starting withdraw() in AccountServiceImpl for [{}]", accountNumber);
 		AppResponse resp = null;
 		String errMsg = "Failed to withdraw amount to the account as the account number";
-		
+
 		if(StringUtils.isNullOrEmpty(accountNumber)){
 			Logger.error(errMsg + "is null/empty");
 			return new AppResponse(false, errMsg + "is null/empty", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account Number is found null/empty"));
@@ -187,16 +209,16 @@ public class AccountServiceImpl implements AccountService {
 			Logger.error(errMsg + "account is not found");
 			return new AppResponse(false, errMsg + "account is not found" , new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account is not found in db for requested account number"));
 		}
-		
+
 		Account account = (Account) resp.getData();
 		account.setBalance(account.getBalance().subtract(amount));
-		resp = accountDao.updateBalance(account, amount);
-		
+		resp = accountDao.updateBalance(account, amount, TRANSACTION_TYPE.DEBIT);
+
 		if(!resp.isStatus()){
 			Logger.error("Failed to withdraw amount from the account {} ", accountNumber);
 			return new AppResponse(false, "Failed to withdraw amount from the account", resp.getError());
 		}
-		
+
 		Logger.info("Amount {} withdrawn successfully from the account {}", amount, accountNumber);
 		return new AppResponse(true, "Amount " + amount + account.getCurrencyCode() + " has been withdrawn successfully");
 	}

@@ -24,7 +24,7 @@ import com.revolut.app.service.impl.AccountServiceImpl;
 @Produces(MediaType.APPLICATION_JSON)
 public class AccountController {
 
-	private static final Logger Logger = LogManager.getLogger(UserController.class);
+	private static final Logger Logger = LogManager.getLogger(AccountController.class);
 	private AccountService acctSvc = null;
 	
 	public AccountController(){
@@ -55,7 +55,7 @@ public class AccountController {
     }
     
     @GET
-    @Path("/transfer/{accountNumber}")
+    @Path("/transactions/{accountNumber}")
     @Produces(MediaType.APPLICATION_JSON)
     public AppResponse getAllTransationsByAccountNumber(@PathParam("accountNumber") String accountNumber) {
     	Logger.info("Request received for getting the statement for account {}", accountNumber);

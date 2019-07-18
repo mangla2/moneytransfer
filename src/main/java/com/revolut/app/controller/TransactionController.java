@@ -13,7 +13,7 @@ import com.revolut.app.model.AppResponse;
 import com.revolut.app.service.TransactionService;
 import com.revolut.app.service.impl.TransactionServiceImpl;
 
-@Path("/transaction")
+@Path("/transfer")
 @Produces(MediaType.APPLICATION_JSON)
 public class TransactionController {
 

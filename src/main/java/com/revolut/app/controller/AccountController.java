@@ -6,6 +6,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -62,7 +63,7 @@ public class AccountController {
     	return acctSvc.getTransactionHistoryByAccount(accountNumber);
     }
     
-    @POST
+    @PUT
     @Path("/deposit/{accountNumber}")
     @Consumes(MediaType.APPLICATION_JSON)
     public AppResponse deposit(@PathParam("accountNumber") String accountNumber, @QueryParam("amount") BigDecimal amount) {
@@ -70,7 +71,7 @@ public class AccountController {
         return acctSvc.deposit(accountNumber, amount);
     }
     
-    @POST
+    @PUT
     @Path("/withdraw/{accountNumber}")
     @Consumes(MediaType.APPLICATION_JSON)
     public AppResponse withdraw(@PathParam("accountNumber") String accountNumber, @QueryParam("amount") BigDecimal amount) {

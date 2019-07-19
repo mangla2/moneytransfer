@@ -206,7 +206,7 @@ public class UserDaoImpl implements UserDao {
 			dbConn.savePrepareStatement(connection, statement, criteria);
 			statement.executeUpdate();
 		}catch(SQLException e){
-			Logger.error("Exception occured while creating a new account - {}", e.getMessage());
+			Logger.error("Exception occured while deleting an account - {}", e.getMessage());
 			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_EXCEPTION, "Exception occured :"+e.getMessage()));
 		}
 		Logger.info("Account deleted successfully for user: {}", email);

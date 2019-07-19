@@ -10,6 +10,7 @@ import javax.ws.rs.Produces;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import javax.ws.rs.core.MediaType;
+
 import com.revolut.app.model.AppResponse;
 import com.revolut.app.model.User;
 import com.revolut.app.service.UserService;
@@ -49,7 +50,7 @@ public class UserController {
     }
     
     @DELETE
-    @Path("/{email}")
+    @Path("/delete/{email}")
     public AppResponse deleteUser(@PathParam("email") String email) {
     	Logger.info("Request received for deleting a user having email [{}]", email);
         return userSvc.deleteUser(email);

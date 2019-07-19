@@ -10,7 +10,7 @@ public class DbQueries {
 	public static final String GET_ACCOUNT_BY_ACCOUNT_NUM = "SELECT * from account WHERE accountNumber = ?";
 	public static final String GET_ACCOUNTS_BY_USER = "SELECT * from account where userId IN (SELECT id from users WHERE email = ?)";	
 	public static final String DELETE_USER = "DELETE FROM users WHERE email =?";
-	public static final String DELETE_ACCOUNT_BY_EMAIL = "DELETE FROM account WHERE userId IN (SELECT userId from users WHERE email = ?)";
+	public static final String DELETE_ACCOUNT_BY_EMAIL = "DELETE FROM account WHERE userId IN (SELECT id from users WHERE email = ?)";
 	public static final String DELETE_ACCOUNT = "DELETE FROM account WHERE accountNumber =?";
 	public static final String SAVE_TRANSACTION = "INSERT INTO transaction(transactionId,accountFrom,accountTo,amount,notes,createdAt,currencyCode) VALUES(?,?,?,?,?,NOW(),?)";
 	public static final String UPDATE_ACCOUNT_BALANCE = "UPDATE ACCOUNT SET balance= ? WHERE accountNumber= ?";

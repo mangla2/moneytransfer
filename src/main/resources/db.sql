@@ -27,15 +27,15 @@ CREATE TABLE transaction(
   currencyCode VARCHAR(5) NOT NULL,
 );
 
---INSERT INTO users(firstName, lastName, email) VALUES ('Shubham','Mangla','shubham.mangla@email.com');
---INSERT INTO users(firstName, lastName, email) VALUES ('Mark','Boucher','mark.b@email.com');
---INSERT INTO users(firstName, lastName, email) VALUES ('Steve','Waugh','steve.w@email.com');
---INSERT INTO account(accountNumber, userId, balance, currencyCode) VALUES ('1845878957848','1','50000','INR');
---INSERT INTO account(accountNumber, userId, balance, currencyCode) VALUES ('1845878257848','2','5000','INR');
---INSERT INTO account(accountNumber, userId, balance, currencyCode) VALUES ('1845878157848','3','500','EUR');
---INSERT INTO transaction(transactionId,accountFrom,accountTo,amount,notes,createdAt,currencyCode) VALUES('147847834555','1845878957848','1845878257848','10000','Demo',NOW(),'INR');
---INSERT INTO transaction(transactionId,accountFrom,accountTo,amount,notes,createdAt,currencyCode) VALUES('147847854555','1845878157848','1845878257848','10','Demo',NOW(),'EUR');
---INSERT INTO transaction(transactionId,accountFrom,accountTo,amount,notes,createdAt,currencyCode) VALUES('147847854556','1845878257848','1845878157848','10','Demo',NOW(),'EUR');
+INSERT INTO users(firstName, lastName, email) VALUES ('Shubham','Mangla','shubham.mangla@email.com');
+INSERT INTO users(firstName, lastName, email) VALUES ('Mark','Boucher','mark.b@email.com');
+INSERT INTO users(firstName, lastName, email) VALUES ('Steve','Waugh','steve.w@email.com');
+INSERT INTO account(accountNumber, userId, balance, currencyCode) VALUES ('1845878957848','1','50000','INR');
+INSERT INTO account(accountNumber, userId, balance, currencyCode) VALUES ('1845878257848','2','5000','INR');
+INSERT INTO account(accountNumber, userId, balance, currencyCode) VALUES ('1845878157848','3','500','EUR');
+INSERT INTO transaction(transactionId,accountFrom,accountTo,amount,notes,createdAt,currencyCode) VALUES('147847834555','1845878957848','1845878257848','10000','Demo',NOW(),'INR');
+INSERT INTO transaction(transactionId,accountFrom,accountTo,amount,notes,createdAt,currencyCode) VALUES('147847854555','1845878157848','1845878257848','10','Demo',NOW(),'EUR');
+INSERT INTO transaction(transactionId,accountFrom,accountTo,amount,notes,createdAt,currencyCode) VALUES('147847854556','1845878257848','1845878157848','10','Demo',NOW(),'EUR');
 
 
 

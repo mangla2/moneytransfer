@@ -1,7 +1,8 @@
 package com.revolut.app.config;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -57,11 +58,12 @@ public class DbUtils {
 	public void loadInitData() {
 		Logger.info("Initializing data ..... ");
 		try(Connection conn = DbUtils.getInstance().getConnection()){
-			RunScript.execute(conn, new FileReader("src/main/resources/db.sql"));
+			InputStream is = getClass().getResourceAsStream("/db.sql");
+			RunScript.execute(conn, new BufferedReader(new InputStreamReader(is)));
 		} catch (SQLException e) {
 			Logger.error("Exception occured while loading init data ", e);
 			throw new RuntimeException(e);
-		} catch (FileNotFoundException e) {
+		} catch (Exception e) {
 			Logger.error("Exception occured while loading file in loadInitData():", e);
 			throw new RuntimeException(e);
 		}

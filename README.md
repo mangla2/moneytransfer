@@ -1,7 +1,9 @@
 # Money Transfer between accounts
 
 A Java RESTful API for money transfers between users accounts
+
 Using:
+
 ⋅⋅* JAX-RS API
 ⋅⋅* H2 in memory database
 ⋅⋅* Log4j

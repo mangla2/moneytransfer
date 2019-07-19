@@ -4,11 +4,11 @@ A Java RESTful API for money transfers between users accounts
 
 Using:
 
-⋅⋅* JAX-RS API
-⋅⋅* H2 in memory database
-⋅⋅* Log4j
-⋅⋅* Jetty Container (for Test and Demo app)
-⋅⋅* Apache HTTP Client
+* JAX-RS API
+* H2 in memory database
+* Log4j
+* Jetty Container (for Test and Demo app)
+* Apache HTTP Client
 
 How to run demo app
 ------
@@ -21,17 +21,32 @@ Build the application:
 ```
 mvn clean install
 ```
-Executing Demo App:
+Starting the application:
 
-After installation completes and tests are passed, you may find a .jar-file in target-folder.Run that jar.
+After installation completes and tests are passed, you may find a .jar-file in target-folder. Run that jar.
 ```
-java -jar moneytransfer-1.0-jar-with-dependencies.jar
+java -jar target/moneytransfer-1.0-jar-with-dependencies.jar
 ```
 
 The demo app starts a jetty server on localhost port 8081 .
 An H2 in memory database initialized with some sample user and account data. You can check the below services from any rest client.
 
-Available Services
+Features
+======
+
+* Create user. An account will be implicity created with default balance and currencyCode
+* Create an account or add multiple accounts for a unique user email
+* Deposit to or withdraw money from an account.
+* Transfer money between accounts.
+* List all users or accounts stored in the DB.
+* Delete users and accounts 
+* Get all transaction history for a given account
+* In-memory database to store all transactions and accounts.
+* Thread-safe
+* Error capturing and returning appropriate Error response codes.
+* Unit tests using TDD.
+
+Available API's
 ======
 
 | HTTP METHOD | PATH | USAGE |
@@ -49,3 +64,24 @@ Available Services
 | PUT | /account/deposit/{accountNumber}?amount= | deposit money to account |
 | GET | /account/transactions/{accountNumber} | get all transaction history by account number |
 | PUT | /transfer | perform transaction between 2 accounts |
+
+
+Error Codes in Response
+------
+
+| ErrorCode | Desc |
+| --- | --- |
+| 501 | ERROR_CODE_VALIDATION |
+| 502 | ERROR_CODE_PROCESSING |
+| 503 | ERROR_CODE_EXCEPTION |
+| 504 | ERROR_CODE_NONE |
+
+Using the REST API
+------
+### Creating User
+### Creating Account
+### Get all users
+### Get all accounts of a user
+### Deposit or Withdraw Amount
+### Transfer money
+### Transaction History

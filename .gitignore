@@ -15,6 +15,7 @@
 .settings
 
 target/
+.DS_Store
 
 # Package Files #
 *.jar

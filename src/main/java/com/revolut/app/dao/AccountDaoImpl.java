@@ -311,6 +311,7 @@ public class AccountDaoImpl implements AccountDao {
 							rs.getString(Constants.ACCOUNT_FROM_NUMBER),
 							rs.getString(Constants.ACCOUNT_TO_NUMBER),
 							rs.getString(Constants.NOTES),
+							rs.getString(Constants.ACCOUNT_CURRENCY_CODE),
 							sdf.format(new Date(rs.getTimestamp(Constants.CREATED_AT).getTime()))
 							);
 				}

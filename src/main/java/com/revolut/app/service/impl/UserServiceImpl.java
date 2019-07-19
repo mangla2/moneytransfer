@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
 
 		Logger.info("Creating an account for user having email {}", user.getEmail());
 		long userId = user.getId();
-		String currencyCode = (StringUtils.isNullOrEmpty(user.getCurrencyCode()))  ? "INR" : user.getCurrencyCode();
+		String currencyCode = (StringUtils.isNullOrEmpty(user.getCurrencyCode()))  ? "GBP" : user.getCurrencyCode();
 		resp = accountDao.createAccount(new Account(user.getEmail(), userId, new BigDecimal(5000), currencyCode));
 		if(!resp.isStatus()){
 			userDao.deleteUser(user.getEmail());

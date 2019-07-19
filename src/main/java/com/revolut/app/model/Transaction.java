@@ -35,7 +35,7 @@ public class Transaction {
 	 * @param notes
 	 * @param createdAt
 	 */
-	public Transaction(String transactionId, BigDecimal debitAmount, String from, String to, String notes,
+	public Transaction(String transactionId, BigDecimal debitAmount, String from, String to, String notes, String currencyCode,
 			String createdAt) {
 		super();
 		this.transactionId = transactionId;
@@ -43,6 +43,7 @@ public class Transaction {
 		this.accountFrom = from;
 		this.accountTo = to;
 		this.notes = notes;
+		this.currencyCode = currencyCode;
 		this.createdAt = createdAt;
 	}
 	

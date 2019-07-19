@@ -114,8 +114,13 @@ public class TransactionServiceImpl implements TransactionService {
 		if(!account1.getCurrencyCode().equalsIgnoreCase(account2.getCurrencyCode())){
 			
 			//get the conversion rate
-			conversionRate = CurrencyConverter.getConversionRate(account1.getCurrencyCode(), account2.getCurrencyCode());
-			if(conversionRate == BigDecimal.ZERO){
+			resp = CurrencyConverter.getConversionRate(account1.getCurrencyCode(), account2.getCurrencyCode());
+			if(!resp.isStatus()){
+				return resp;
+			}
+			
+			conversionRate = (BigDecimal) resp.getData();
+			if(conversionRate.equals(BigDecimal.ZERO)){
 				errMsg = "Incorrect Currency Conversion requested or CurrencyCode is null/empty";
 				Logger.error(errMsg);
 				return new AppResponse(false, "Failed to transfer money since currency code is incorrect", new ErrorDetails(Constants.ERROR_CODE_PROCESSING, errMsg));
@@ -141,6 +146,7 @@ public class TransactionServiceImpl implements TransactionService {
 		
 		transx = (Transaction) resp.getData();
 		Transaction respObj = new Transaction(transx.getTransactionId(), transx.getAmount(), transx.getCreatedAt());
+		respObj.setCurrencyCode(transx.getCurrencyCode());
 		return new AppResponse(true, respObj, "Transaction is successful");
 	}
 

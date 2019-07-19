@@ -1,0 +1,440 @@
+{
+	"info": {
+		"name": "Money Transfer",
+		"_postman_id": "6598d9f6-35a9-c777-a315-a2d0f9e443dc",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create New User 1",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n           \n            \"firstName\": \"Mark\",\n            \"lastName\": \"Woods\",\n            \"email\": \"mark.woods@app.com\",\n            \"currencyCode\":\"EUR\"\n        }"
+				},
+				"url": {
+					"raw": "http://localhost:8081/user/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"user",
+						"create"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Create New User 2",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n           \n            \"firstName\": \"Shubham\",\n            \"lastName\": \"Mangla\",\n            \"email\": \"me@shubhammangla.in\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8081/user/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"user",
+						"create"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Create New User 3",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n           \n            \"firstName\": \"Siddhant\",\n            \"lastName\": \"Agrawal\",\n            \"email\": \"siddhant.agrawal@aricent.com\"\n        }"
+				},
+				"url": {
+					"raw": "http://localhost:8081/user/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"user",
+						"create"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:8081/user/all",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"user",
+						"all"
+					]
+				},
+				"description": "Get all users"
+			},
+			"response": []
+		},
+		{
+			"name": "Get User By Email",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:8081/user/shubham.manglaa@email.com",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"user",
+						"shubham.manglaa@email.com"
+					]
+				},
+				"description": "Get user info by email"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8081/user/delete/shubham.mangla@email.com",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"user",
+						"delete",
+						"shubham.mangla@email.com"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Create New Account",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\":\"steve.w@email.com\",\n\t\"balance\":\"50000.00\",\n\t\"currencyCode\":\"GBP\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8081/account/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"account",
+						"create"
+					]
+				},
+				"description": "Creating a new Account"
+			},
+			"response": []
+		},
+		{
+			"name": "Create New Account",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\":\"shubham.manglaa@email.com\",\n\t\"balance\":\"106850.00\",\n\t\"currencyCode\":\"INR\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8081/account/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"account",
+						"create"
+					]
+				},
+				"description": "Creating a new Account"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Account By Email",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:8081/user/account/shubham.mangla@email.com",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"user",
+						"account",
+						"shubham.mangla@email.com"
+					]
+				},
+				"description": "Get user info by email"
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Accounts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:8081/account/all",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"account",
+						"all"
+					]
+				},
+				"description": "Get user info by email"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Account By AccountNumber copy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:8081/account/701729781134364700",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"account",
+						"701729781134364700"
+					]
+				},
+				"description": "Get user info by email"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Account",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8081/account/delete/1845878257848",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"account",
+						"delete",
+						"1845878257848"
+					]
+				},
+				"description": "Creating a new Account"
+			},
+			"response": []
+		},
+		{
+			"name": "Transfer Money",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"accountFrom\":\"801729781134364219\",\n\t\"accountTo\":\"701729781134364700\",\n\t\"amount\":\"100\",\n\t\"notes\":\"Pilot project\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8081/transfer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"transfer"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Statement History",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:8081/account/transactions/801729781134364219",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"account",
+						"transactions",
+						"801729781134364219"
+					]
+				},
+				"description": "Get all users"
+			},
+			"response": []
+		},
+		{
+			"name": "Deposit Money",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:8081/account/deposit/801729781134364219?amount=100",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"account",
+						"deposit",
+						"801729781134364219"
+					],
+					"query": [
+						{
+							"key": "amount",
+							"value": "100",
+							"equals": true
+						}
+					]
+				},
+				"description": "Get all users"
+			},
+			"response": []
+		},
+		{
+			"name": "Withdraw Money",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:8081/account/withdraw/801729781134364219?amount=100",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"account",
+						"withdraw",
+						"801729781134364219"
+					],
+					"query": [
+						{
+							"key": "amount",
+							"value": "100",
+							"equals": true
+						}
+					]
+				},
+				"description": "Get all users"
+			},
+			"response": []
+		}
+	]
+}

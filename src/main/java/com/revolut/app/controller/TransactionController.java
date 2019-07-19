@@ -28,6 +28,8 @@ public class TransactionController {
     @Consumes(MediaType.APPLICATION_JSON)
     public AppResponse transfer(String transaction) {
     	Logger.info("Request received for transfering the money {}", transaction);
-        return transactionSvc.transferMoney(transaction);
+        AppResponse resp = transactionSvc.transferMoney(transaction);
+        Logger.info("Response returned {}", resp);
+    	return resp;
     }
 }

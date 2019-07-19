@@ -93,6 +93,7 @@ public class Account {
 		this.email = email;
 		this.balance = balance;
 		this.currencyCode = currencyCode;
+		this.transactionsList = new ArrayList<>();
 	}
 
 
@@ -216,7 +217,7 @@ public class Account {
 	 */
 	@Override
 	public String toString() {
-		return "Account [accountNumber=" + accountNumber + ", email=" + email + ", userId=" + userId + ", balance="
+		return "Account [accountNumber=" + accountNumber + ", email=" + email + ", balance="
 				+ balance + ", currencyCode=" + currencyCode + "]";
 	}
 

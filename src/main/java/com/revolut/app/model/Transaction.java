@@ -205,4 +205,16 @@ public class Transaction {
 		this.currencyCode = currencyCode;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Transaction [transactionId=" + transactionId + ", amount=" + amount + ", accountFrom=" + accountFrom
+				+ ", accountTo=" + accountTo + ", type=" + type + ", notes=" + notes + ", createdAt=" + createdAt
+				+ ", currencyCode=" + currencyCode + "]";
+	}
+	
+	
+
 }

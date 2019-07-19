@@ -102,7 +102,8 @@ public class TransactionServiceImpl implements TransactionService {
 			return new AppResponse(false, errMsg, new ErrorDetails(Constants.ERROR_CODE_VALIDATION,errMsg));
 		}
 
-		// if yes, then check whether the amount specified is there in sender's account
+		Logger.info("Both accounts were found and correct.Proceeding for the transaction...");	
+		
 		if(account1.getBalance().compareTo(money) < 0){
 			errMsg = "Not enough balance to transfer money from the account";
 			Logger.error(errMsg);
@@ -115,16 +116,15 @@ public class TransactionServiceImpl implements TransactionService {
 			//get the conversion rate
 			conversionRate = CurrencyConverter.getConversionRate(account1.getCurrencyCode(), account2.getCurrencyCode());
 			if(conversionRate == BigDecimal.ZERO){
-				errMsg = "Incorrect Currency Conversion requested";
+				errMsg = "Incorrect Currency Conversion requested or CurrencyCode is null/empty";
 				Logger.error(errMsg);
-				return new AppResponse(false, "Failed to transfer money since conversion cannot happen between two accounts", new ErrorDetails(Constants.ERROR_CODE_PROCESSING,errMsg));
+				return new AppResponse(false, "Failed to transfer money since currency code is incorrect", new ErrorDetails(Constants.ERROR_CODE_PROCESSING, errMsg));
 			}
 		}
 
 		// calculate the amount to be transferred
 		BigDecimal amountToBeAdded = money.multiply(conversionRate);
 		
-		// transfer the money from one account to another
 		resp = accountDao.makeTransaction(new Transaction(money, account1, account2, notes),amountToBeAdded);
 		if(!resp.isStatus()){
 			errMsg = "Transaction failed to happen";

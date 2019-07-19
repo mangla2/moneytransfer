@@ -138,8 +138,8 @@ public class AccountDaoImpl implements AccountDao {
 			try (ResultSet rs = statement.executeQuery();) {
 				if (rs.next()) {
 					account = new Account(
-							rs.getInt(Constants.ACCOUNT_USER),
-							rs.getString(Constants.ACCOUNT_NUMBER),
+							accountNumber,
+							rs.getString(Constants.USER_EMAIL),
 							rs.getBigDecimal(Constants.ACCOUNT_BALANCE),
 							rs.getString(Constants.ACCOUNT_CURRENCY_CODE)
 							);
@@ -167,6 +167,7 @@ public class AccountDaoImpl implements AccountDao {
 				wait();
 			}
 
+			Logger.info("Locking the db for Initiating the transaction {}", transaction);
 			// update accounts balance
 			from.setBalance(from.getBalance().subtract(transaction.getAmount()));
 			to.setBalance(to.getBalance().add(amountConverted));
@@ -216,6 +217,7 @@ public class AccountDaoImpl implements AccountDao {
 						connection.commit();
 						transaction.setTransactionId(String.valueOf(transactionId));
 						from.getTransactionsList().add(transaction);
+						Logger.info("Transaction is successful having transactionId {}", transactionId);
 					}
 				}catch(InternalServerError e){
 					connection.rollback();
@@ -232,6 +234,7 @@ public class AccountDaoImpl implements AccountDao {
 			Logger.error("Exception occured - {}", e.getMessage());
 			return new AppResponse(false,"Failed to complete the transaction", new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,e.getMessage()));
 		}
+		Logger.info("Unlocking the db as transaction is completed {}", transaction);
 		return new AppResponse(true, transaction);
 	}
 
@@ -336,7 +339,8 @@ public class AccountDaoImpl implements AccountDao {
 					wait();
 				}
 			}
-
+			
+			Logger.info("Locking the db for initiating the transaction {}", transaction);
 			try (Connection connection = dbConn.getConnection()){
 				connection.setAutoCommit(false);
 
@@ -395,6 +399,7 @@ public class AccountDaoImpl implements AccountDao {
 			Logger.error("Exception occured - {}", e.getMessage());
 			return new AppResponse(false,"Failed to update the balance", new ErrorDetails(Constants.ERROR_CODE_EXCEPTION,e.getMessage()));
 		}
+		Logger.info("Unlocking the db as transaction is completed {}", transaction);
 		return new AppResponse(true, transaction);
 	}
 

@@ -7,13 +7,12 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import javax.ws.rs.HttpMethod;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
+import org.h2.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -32,14 +31,18 @@ public class CurrencyConverter {
 		Logger.debug("Starting getConversionRate in CurrencyConverter from[{}] to[{}]", fromCurrencyCode, toCurrencyCode);
 		BigDecimal conversionRate = new BigDecimal(0);
 
+		if(StringUtils.isNullOrEmpty(fromCurrencyCode) || StringUtils.isNullOrEmpty(toCurrencyCode)){
+			Logger.error("Fail to proceed further as Currency Code is null/empty");
+			return conversionRate;
+		}
+
 		if (fromCurrencyCode.equals(toCurrencyCode)) {
+			Logger.info("Same currency for both the accounts.Hence no need to check conversion rate");
 			return conversionRate.ONE;
 		}
 
-		if ((fromCurrencyCode != null && !fromCurrencyCode.isEmpty())
-				&& (toCurrencyCode != null && !toCurrencyCode.isEmpty())) {
-
-			try{
+		Logger.info("Checking the latest conversion rate from {} to {}", fromCurrencyCode, toCurrencyCode);
+		try{
 			StringBuilder url = new StringBuilder(BASE_API);
 			url.append(Constants.ACCESS_KEY_PARAM)
 			.append(ACCESS_KEY)
@@ -64,9 +67,8 @@ public class CurrencyConverter {
 				conversionRate = new BigDecimal(conversionResult);
 				conversionRate = conversionRate.setScale(2, BigDecimal.ROUND_HALF_EVEN);
 			}
-			}catch(Exception e){
-				Logger.error("Failed to get the conversion rate from third party fixer api - {}", e.getMessage());
-			}
+		}catch(Exception e){
+			Logger.error("Failed to get the conversion rate from third party fixer api - {}", e.getMessage());
 		}
 		return conversionRate;
 	}
@@ -78,10 +80,11 @@ public class CurrencyConverter {
 		HttpURLConnection connection = null;
 		URL url = null;
 		try {
+			Logger.info("Calling API to check the latest conversion rate {}", baseUrl);
 			url = new URL(baseUrl);
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod(HttpMethod.GET);
-			
+
 			if (connection.getResponseCode() == 200) {
 				InputStream inputStream = connection.getInputStream();
 				InputStreamReader ipr = new InputStreamReader(inputStream);
@@ -92,7 +95,7 @@ public class CurrencyConverter {
 					jsonString.append(inputLine);
 				}
 				resp = new ObjectMapper().readValue(jsonString.toString(), FixerResponse.class);
-				Logger.info("Response received for conversion rates{}", resp);
+				Logger.info("Response received for conversion rates {}", resp);
 			}else{
 				resp = new FixerResponse(false,new FixerError(Constants.ERROR_CODE_PROCESSING,"Could not connect to Fixer API successfully"));
 			}

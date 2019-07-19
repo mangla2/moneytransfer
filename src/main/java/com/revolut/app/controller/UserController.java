@@ -31,7 +31,9 @@ public class UserController {
     @Path("/all")
     public AppResponse getAllUsers() {
     	Logger.info("Request received for getting all the users");
-    	return userSvc.getAllUsers();
+    	AppResponse resp = userSvc.getAllUsers();
+    	Logger.info("Response returned {}", resp);
+    	return resp;
     }
     
     @POST
@@ -39,28 +41,36 @@ public class UserController {
     @Consumes(MediaType.APPLICATION_JSON)
     public AppResponse createUser(User user) {
     	Logger.info("Request received for creating a user {}", user);
-        return userSvc.createUser(user);
+    	AppResponse resp = userSvc.createUser(user);
+    	Logger.info("Response returned {}", resp);
+    	return resp;
     }
     
     @GET
     @Path("/{email}")
     public AppResponse getUser(@PathParam("email") String email) {
     	Logger.info("Request received for getting all the accounts of user");
-    	return userSvc.getUser(email);
+    	AppResponse resp =  userSvc.getUser(email);
+    	Logger.info("Response returned {}", resp);
+    	return resp;
     }
     
     @DELETE
     @Path("/delete/{email}")
     public AppResponse deleteUser(@PathParam("email") String email) {
     	Logger.info("Request received for deleting a user having email [{}]", email);
-        return userSvc.deleteUser(email);
+    	AppResponse resp = userSvc.deleteUser(email);
+    	Logger.info("Response returned {}", resp);
+    	return resp;
     }
     
     @GET
     @Path("/account/{email}")
     public AppResponse getAllAccountForUser(@PathParam("email") String email) {
     	Logger.info("Request received for getting all the accounts of user [{}]", email);
-    	return userSvc.getAccountsByUser(email);
+    	AppResponse resp = userSvc.getAccountsByUser(email);
+    	Logger.info("Response returned {}", resp);
+    	return resp;
     }
 
 }

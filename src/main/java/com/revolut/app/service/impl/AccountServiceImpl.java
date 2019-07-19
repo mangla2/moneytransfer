@@ -79,7 +79,7 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public AppResponse getAccountByAccountNumber(String accountNumber){
-		Logger.debug("Starting deleteAccountByAccountNumber() in AccountServiceImpl for [{}]", accountNumber);
+		Logger.debug("Starting getAccountByAccountNumber() in AccountServiceImpl for [{}]", accountNumber);
 		AppResponse resp = null;
 
 		if(StringUtils.isNullOrEmpty(accountNumber)){
@@ -94,13 +94,8 @@ public class AccountServiceImpl implements AccountService {
 			return new AppResponse(false,"Failed to get as the account is not found", new ErrorDetails(Constants.ERROR_CODE_VALIDATION,"Account is not found in db for requested account number"));
 		}
 
-		//if account exists, then delete
-		resp = accountDao.deleteAccountByAccountNumber(accountNumber);
-		if(!resp.isStatus()){
-			return new AppResponse(false, "Account not found in Db", resp.getError());
-		}
-
-		Logger.info("Account deleted successfully having account number [{}]", accountNumber);
+        Account acc = (Account) resp.getData();
+		Logger.info("Account fetched successfully having account number [{}]", acc);
 		return resp;
 	}
 

@@ -70,7 +70,7 @@ public class DbUtils {
 	}
 
 	public void savePrepareStatement(Connection conn, PreparedStatement statement, LinkedHashMap<String,Object> criteria){
-		Logger.info("createPreparedStatement() : Preparing the query for execution");
+		Logger.info("Preparing the query for execution");
 
 		int[] pos = new int[]{1};
 

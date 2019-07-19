@@ -36,23 +36,37 @@ public class AccountController {
     @Path("/all")
     public AppResponse getAllAccounts() {
     	Logger.info("Request received for getting all the accounts");
-    	return acctSvc.getAllAccounts();
+    	AppResponse resp = acctSvc.getAllAccounts();
+    	Logger.info("Response returned {}", resp);
+    	return resp;
     }
 
+    @GET
+    @Path("/{accountNumber}")
+    public AppResponse getAccountByAccountNumber(@PathParam("accountNumber") String accountNumber) {
+    	Logger.info("Request received for getting the account for {}", accountNumber);
+    	AppResponse resp = acctSvc.getAccountByAccountNumber(accountNumber);
+    	Logger.info("Response returned {}", resp);
+    	return resp;
+    }
     
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     public AppResponse createAccount(Account account) {
     	Logger.info("Request received for creating the account {}", account);
-        return acctSvc.createAccount(account);
+    	AppResponse resp = acctSvc.createAccount(account);
+    	Logger.info("Response returned {}", resp);
+    	return resp;
     }
 
     @DELETE
     @Path("/delete/{accountNumber}")
     public AppResponse deleteAccount(@PathParam("accountNumber") String accountNumber) {
     	Logger.info("Request received for deleting the account {}", accountNumber);
-        return acctSvc.deleteAccountByAccountNumber(accountNumber);
+    	AppResponse resp = acctSvc.deleteAccountByAccountNumber(accountNumber);
+    	Logger.info("Response returned {}", resp);
+    	return resp;
     }
     
     @GET
@@ -60,7 +74,9 @@ public class AccountController {
     @Produces(MediaType.APPLICATION_JSON)
     public AppResponse getAllTransationsByAccountNumber(@PathParam("accountNumber") String accountNumber) {
     	Logger.info("Request received for getting the statement for account {}", accountNumber);
-    	return acctSvc.getTransactionHistoryByAccount(accountNumber);
+    	AppResponse resp = acctSvc.getTransactionHistoryByAccount(accountNumber);
+    	Logger.info("Response returned {}", resp);
+    	return resp;
     }
     
     @PUT
@@ -68,7 +84,9 @@ public class AccountController {
     @Consumes(MediaType.APPLICATION_JSON)
     public AppResponse deposit(@PathParam("accountNumber") String accountNumber, @QueryParam("amount") BigDecimal amount) {
     	Logger.info("Request received for depositing amount [{}] to the account {}", amount, accountNumber);
-        return acctSvc.deposit(accountNumber, amount);
+    	AppResponse resp = acctSvc.deposit(accountNumber, amount);
+    	Logger.info("Response returned {}", resp);
+    	return resp;
     }
     
     @PUT
@@ -76,6 +94,8 @@ public class AccountController {
     @Consumes(MediaType.APPLICATION_JSON)
     public AppResponse withdraw(@PathParam("accountNumber") String accountNumber, @QueryParam("amount") BigDecimal amount) {
     	Logger.info("Request received for depositing amount [{}] to the account {}", amount, accountNumber);
-        return acctSvc.withdraw(accountNumber, amount);
+    	AppResponse resp = acctSvc.withdraw(accountNumber, amount);
+    	Logger.info("Response returned {}", resp);
+    	return resp;
     }
 }

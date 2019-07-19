@@ -103,7 +103,7 @@ Response
             {
                 "accountNumber": "601729781134364672",
                 "balance": 5000,
-                "currencyCode": "GBP",
+                "currencyCode": "USD",
                 "transactionsList": []
             }
         ]

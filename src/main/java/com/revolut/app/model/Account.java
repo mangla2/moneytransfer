@@ -167,6 +167,13 @@ public class Account {
 	public void setUserId(long userId) {
 		this.userId = userId;
 	}
+	
+	/**
+	 * @param transactionsList the transactionsList to set
+	 */
+	public void setTransactionsList(List<Transaction> transactionsList) {
+		this.transactionsList = transactionsList;
+	}
 
 	public String generateAccountNumber(String email) {
 		int TOTAL_BITS = 64;

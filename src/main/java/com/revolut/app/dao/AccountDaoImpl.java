@@ -134,7 +134,7 @@ public class AccountDaoImpl implements AccountDao {
 		try (Connection connection = dbConn.getConnection();
 				PreparedStatement statement = connection.prepareStatement(DbQueries.GET_ACCOUNT_BY_ACCOUNT_NUM)){
 
-			statement.setString(1, accountNumber);
+			dbConn.savePrepareStatement(connection, statement, criteria);
 			try (ResultSet rs = statement.executeQuery();) {
 				if (rs.next()) {
 					account = new Account(
@@ -143,6 +143,7 @@ public class AccountDaoImpl implements AccountDao {
 							rs.getBigDecimal(Constants.ACCOUNT_BALANCE),
 							rs.getString(Constants.ACCOUNT_CURRENCY_CODE)
 							);
+					account.setTransactionsList(null);
 				}
 			}catch(SQLException e){
 				Logger.error("Exception occured while getting the account", e.getMessage());
@@ -270,11 +271,11 @@ public class AccountDaoImpl implements AccountDao {
 					transaction.setAmount(rs.getBigDecimal(Constants.AMOUNT));
 					transaction.setCurrencyCode(rs.getString(Constants.ACCOUNT_CURRENCY_CODE));
 					String notes = rs.getString(Constants.NOTES);
-					
+
 					if(from.equalsIgnoreCase(to)){
 						transaction.setType(Enum.valueOf(TRANSACTION_TYPE.class, notes));
 					}
-					
+
 					transaction.setNotes(rs.getString(Constants.NOTES));
 					transaction.setCreatedAt(sdf.format(new Date(rs.getTimestamp(Constants.CREATED_AT).getTime())));
 					transactionList.add(transaction);
@@ -330,9 +331,9 @@ public class AccountDaoImpl implements AccountDao {
 	@Override
 	public synchronized AppResponse updateBalance(Account account, BigDecimal amount, TRANSACTION_TYPE type) {
 		Logger.debug("Starting updateBalance in AccountDaoImpl for accountNumber {}", account.getAccountNumber());
-        String notes = TRANSACTION_TYPE.CREDIT.name();
-        Transaction transaction = new Transaction();
-        
+		String notes = TRANSACTION_TYPE.CREDIT.name();
+		Transaction transaction = new Transaction();
+
 		try{
 			if(TRANSACTION_TYPE.DEBIT.equals(type)){
 				notes = TRANSACTION_TYPE.DEBIT.name();
@@ -340,7 +341,7 @@ public class AccountDaoImpl implements AccountDao {
 					wait();
 				}
 			}
-			
+
 			Logger.info("Locking the db for initiating the transaction {}", transaction);
 			try (Connection connection = dbConn.getConnection()){
 				connection.setAutoCommit(false);

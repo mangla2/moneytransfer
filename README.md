@@ -81,7 +81,7 @@ Using the REST API
 ------
 
 ### Creating User
-URL:- http://localhost:8081/user/create
+URL:- http://localhost:8081/user/create <br/>
 Request Body
 ```
 {
@@ -112,7 +112,7 @@ Response
 ```
 
 ### Creating Account
-URL:- http://localhost:8081/account/create
+URL:- http://localhost:8081/account/create <br/>
 Request
 ```
 {
@@ -136,7 +136,7 @@ Response
 ```
 
 ### Get all users
-URL:- http://localhost:8081/user/all
+URL:- http://localhost:8081/user/all <br/>
 Response
 
 ```
@@ -177,7 +177,7 @@ Response
 ```
 
 ### Get all accounts of a user
-URL:- http://localhost:8081/user/account/steve.w@email.com
+URL:- http://localhost:8081/user/account/steve.w@email.com <br/>
 Response
 
 ```
@@ -199,7 +199,7 @@ Response
 ```
 
 ### Deposit or Withdraw Amount
-URL:- http://localhost:8081/account/deposit/701729781134364700?amount=100
+URL:- http://localhost:8081/account/deposit/701729781134364700?amount=100 <br/>
 Response
 
 ```
@@ -219,7 +219,7 @@ URL:- http://localhost:8081/account/withdraw/701729781134364700?amount=100
 ```
 
 ### Transfer money
-URL: http://localhost:8081/transfer
+URL: http://localhost:8081/transfer <br/>
 Request Body
 
 ```
@@ -246,7 +246,7 @@ Response
 ```
 
 ### Transaction History
-URL: http://localhost:8081/account/transactions/601729781134364672
+URL: http://localhost:8081/account/transactions/601729781134364672 <br/>
 
 Response
 ```

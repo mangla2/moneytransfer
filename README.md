@@ -7,7 +7,7 @@ Using:
 * JAX-RS API
 * H2 in memory database
 * Log4j
-* Jetty Container (for Test and Demo app)
+* Jetty Container
 * Apache HTTP Client
 
 How to run demo app

@@ -20,6 +20,7 @@ import com.revolut.app.model.Transaction;
 import com.revolut.app.model.Transaction.TRANSACTION_TYPE;
 import com.revolut.app.model.User;
 import com.revolut.app.service.AccountService;
+import com.revolut.app.utils.CurrencyConverter;
 
 public class AccountServiceImpl implements AccountService {
 
@@ -72,6 +73,13 @@ public class AccountServiceImpl implements AccountService {
 		}
 
 		User u = (User) resp.getData();
+		
+		resp = CurrencyConverter.checkValidCurrency(account.getCurrencyCode());
+		if(!resp.isStatus()) {
+			Logger.error("Currency type not supported");
+			return new AppResponse(false, "Account cannot be created", new ErrorDetails(Constants.ERROR_CODE_VALIDATION, "Currency type not supported"));
+		}
+		
 		account.setUserId(u.getId());
 		return accountDao.createAccount(account);
 	}

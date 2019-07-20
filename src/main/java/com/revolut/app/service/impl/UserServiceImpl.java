@@ -16,6 +16,7 @@ import com.revolut.app.model.AppResponse;
 import com.revolut.app.model.ErrorDetails;
 import com.revolut.app.model.User;
 import com.revolut.app.service.UserService;
+import com.revolut.app.utils.CurrencyConverter;
 
 public class UserServiceImpl implements UserService {
 
@@ -48,7 +49,7 @@ public class UserServiceImpl implements UserService {
 		if(user == null){
 			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_VALIDATION, "User found is null"));
 		}
-
+		
 		Logger.info("Checking whether user exists with requested email {} or not", user.getEmail());
 		resp = userDao.getUserByEmail(user.getEmail());
 		if(resp.getData() != null) {
@@ -56,6 +57,12 @@ public class UserServiceImpl implements UserService {
 			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_NONE, "User already exists"));
 		}
 
+		resp = CurrencyConverter.checkValidCurrency(user.getCurrencyCode());
+		if(!resp.isStatus()) {
+			Logger.error("Currency type not supported");
+			return new AppResponse(false, "User cannot be created", new ErrorDetails(Constants.ERROR_CODE_VALIDATION, "Currency type not supported"));
+		}
+		
 		resp = userDao.saveUser(user);
 		if(!resp.isStatus()) {
 			return resp;

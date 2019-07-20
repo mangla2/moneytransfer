@@ -57,7 +57,7 @@ public class CurrencyConverter {
 				Logger.error(response.getError().getType());
 				return new AppResponse(false, new ErrorDetails(response.getError().getCode(), response.getError().getType()));
 			}
-			
+
 			Object rates = response.getRates();
 			Gson gson = new Gson();
 			LinkedHashMap<String,Double> ratesMap = gson.fromJson(rates.toString(), LinkedHashMap.class);
@@ -113,5 +113,43 @@ public class CurrencyConverter {
 			resp = new FixerResponse(false,new FixerError(Constants.ERROR_CODE_EXCEPTION," Not able to connect to API while the currency conversion response "+ e.getMessage()));
 		}
 		return resp;
+	}
+
+	public static AppResponse checkValidCurrency(String currCode) {
+
+		if(StringUtils.isNullOrEmpty(currCode)){
+			Logger.error("Fail to proceed further as Currency Code received is null/empty");
+			return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_VALIDATION, "Currency Code received is null/empty"));
+		}
+
+		Logger.info("Checking the validity of currency {}", currCode);
+		try{
+			StringBuilder url = new StringBuilder(BASE_API);
+			url.append(Constants.ACCESS_KEY_PARAM)
+			.append(ACCESS_KEY)
+			.append(Constants.FORMAT_KEY_PARAM)
+			.append(FORMAT_VALUE);
+
+			FixerResponse response = getConversionResponse(url.toString());
+
+			if (!response.getSuccess()) {
+				Logger.error(response.getError().getType());
+				return new AppResponse(false, new ErrorDetails(response.getError().getCode(), response.getError().getType()));
+			}
+
+			Object rates = response.getRates();
+			Gson gson = new Gson();
+			LinkedHashMap<String,Double> ratesMap = gson.fromJson(rates.toString(), LinkedHashMap.class);
+
+			if(!ratesMap.containsKey(currCode.toUpperCase())){
+				Logger.error("Requested currency not supported");
+				return new AppResponse(false, new ErrorDetails(Constants.ERROR_CODE_VALIDATION, "Requested currency not supported"));
+			}
+
+			return new AppResponse(true,true);
+		}catch(Exception e){
+			Logger.error("Exception occured while getting the currency conversion response - {}", e.getMessage());
+			return new AppResponse(false,new ErrorDetails(Constants.ERROR_CODE_EXCEPTION," Not able to connect to API while the currency conversion response "+ e.getMessage()));
+		}
 	}
 }

@@ -9,7 +9,7 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<junit.version>4.12</junit.version>
+		<junit.version>4.13.1</junit.version>
 		<jetty.version>9.4.18.v20190429</jetty.version>
 		<jersey.version>2.28</jersey.version>
 		<log4j.version>2.7</log4j.version>
